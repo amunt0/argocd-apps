@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: forecastle
-  namespace: argocd
+  namespace: argo-system
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
