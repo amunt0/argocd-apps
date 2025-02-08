@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/amunt0/argocd-apps
     targetRevision: HEAD
-    path: kustomize
+    path: configs/kustomize/
     kustomize: {}
   destination:
     server: https://kubernetes.default.svc

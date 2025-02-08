@@ -18,7 +18,6 @@ spec:
           persistentVolume:
             enabled: true
             size: 3Gi
-            storageClass: "gp3"  # Using AWS EBS GP3 storage class
           resources:
             requests:
               cpu: 200m

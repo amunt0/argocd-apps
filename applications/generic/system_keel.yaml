@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keel
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://keel-hq.github.io/keel/
+    chart: keel
+    targetRevision: 0.9.9
+    helm:
+      values: |
+        service:
+          enabled: true
+        helmProvider:
+          enabled: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argo-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

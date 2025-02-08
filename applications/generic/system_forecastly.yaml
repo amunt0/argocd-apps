@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: forecastle
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://stakater.github.io/stakater-charts
+    chart: forecastle
+    targetRevision: v1.0.97
+    helm:
+      values: |
+        forecastle:
+          config:
+            namespaceSelector:
+              matchNames:
+                - argo-system
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argo-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
