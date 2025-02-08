@@ -20,7 +20,7 @@ spec:
                 - argo-system
   destination:
     server: https://kubernetes.default.svc
-    namespace: argo-system
+    namespace: kube-system
   syncPolicy:
     automated:
       prune: true
