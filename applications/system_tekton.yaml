@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tekton
+  namespace: argo-system
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/amount0/argocd-apps
+    targetRevision: HEAD
+    path: kustomize
+    kustomize: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tekton
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

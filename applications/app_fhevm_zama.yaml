@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fhevm-zama
+  namespace: argo-system
+  labels:
+    category: apps
+spec:
+  project: apps
+  source:
+    repoURL: https://github.com/amunt0/fhevm-zama
+    targetRevision: HEAD
+    path: chart
+    helm:
+      values: |
+        global:
+          imageRegistry: ghcr.io/zama-ai
+          imageTag: v0.8.2-rc4
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: fhevm
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
