@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/amount0/argocd-apps
+    repoURL: https://github.com/amunt0/argocd-apps
     targetRevision: HEAD
     path: kustomize
     kustomize: {}
