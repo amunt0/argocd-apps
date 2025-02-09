@@ -17,12 +17,21 @@ spec:
         - name: evm-indexer
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: Always
+          env:
+            - name: CONFIG_PATH
+              value: "/etc/eth-indexer/config.toml"
+            - name: RUST_LOG
+              value: "info"
+            - name: RUST_BACKTRACE
+              value: "1"
           ports:
             - name: metrics
               containerPort: {{ .Values.metrics.port }}
           volumeMounts:
             - name: data
-              mountPath: /data
+              mountPath: /data/eth-indexer
+            - name: config
+              mountPath: /etc/eth-indexer
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           livenessProbe:
@@ -41,3 +50,6 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: evm-indexer-data
+        - name: config
+          configMap:
+            name: evm-indexer-config
