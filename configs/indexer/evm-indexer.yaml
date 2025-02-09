@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evm-indexer
+  namespace: your-namespace
+  annotations:
+    keel.sh/policy: force  # Force update the image
+    keel.sh/trigger: poll  # Poll for image updates
+    keel.sh/pollSchedule: "@every 1m"  # Check every minute
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evm-indexer
+  template:
+    metadata:
+      labels:
+        app: evm-indexer
+    spec:
+      containers:
+        - name: evm-indexer
+          image: ghcr.io/amunt0/evm-indexer:latest
+          imagePullPolicy: Always
