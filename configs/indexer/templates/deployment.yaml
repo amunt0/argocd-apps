@@ -24,6 +24,14 @@ spec:
               value: "info"
             - name: RUST_BACKTRACE
               value: "1"
+          command: ["/bin/sh"]  # Temporarily override for debugging
+          args: 
+            - -c
+            - |
+              ls -la /etc/eth-indexer/
+              cat /etc/eth-indexer/config.toml
+              echo "Starting indexer..."
+              eth-high-perf-indexer
           ports:
             - name: metrics
               containerPort: {{ .Values.metrics.port }}
@@ -32,20 +40,6 @@ spec:
               mountPath: /data/eth-indexer
             - name: config
               mountPath: /etc/eth-indexer
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          livenessProbe:
-            httpGet:
-              path: /metrics
-              port: metrics
-            initialDelaySeconds: 30
-            periodSeconds: 10
-          readinessProbe:
-            httpGet:
-              path: /metrics
-              port: metrics
-            initialDelaySeconds: 5
-            periodSeconds: 10
       volumes:
         - name: data
           persistentVolumeClaim:
