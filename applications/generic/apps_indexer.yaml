@@ -14,6 +14,12 @@ spec:
         image:
           repository: ghcr.io/amunt0/evm-indexer
           tag: latest
+        indexer:
+          rpcEndpoint: "http://192.168.68.140:8545"
+          blocksInMemory: 1000
+          rotationBlocks: 10000
+          metricsPort: 9090
+          startBlock: 21000000
   destination:
     server: https://kubernetes.default.svc
     namespace: fhevm
