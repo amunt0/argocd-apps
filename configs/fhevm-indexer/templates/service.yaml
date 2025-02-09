@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fhevm-indexer
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: fhevm-indexer
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.metrics.port }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+    - port: 80
+      targetPort: 8080      
+  selector:
+    app: fhevm-indexer

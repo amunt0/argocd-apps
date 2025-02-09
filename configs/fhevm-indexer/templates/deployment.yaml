@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fhevm-indexer
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fhevm-indexer
+  template:
+    metadata:
+      labels:
+        app: fhevm-indexer
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: block-processor
+          image: "{{ .Values.blockProcessor.image.repository }}:{{ .Values.blockProcessor.image.tag }}"
+          imagePullPolicy: {{ .Values.blockProcessor.image.pullPolicy }}
+          env:
+            - name: TM_NODE
+              value: "http://{{ .Values.blockProcessor.tendermintNode }}:26657"
+            - name: STORAGE_PATH
+              value: "/data"
+            - name: RPC_ENDPOINT
+              value: "http://{{ .Values.blockProcessor.rpcEndpoint }}"
+            - name: START_BLOCK
+              value: "{{ .Values.blockProcessor.startBlock }}"
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 10"]
+          volumeMounts:
+            - name: data
+              mountPath: "/data"
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 5Gi

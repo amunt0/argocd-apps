@@ -1,0 +1,28 @@
+image:
+  repository: ghcr.io/amunt0/evm-processor/block-processor
+  tag: latest # 0.0.1 ?
+  pullPolicy: Always
+
+persistence:
+  size: 5Gi
+
+resources:
+  requests:
+    cpu: 128m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 500Mi
+
+rpcEndpoint: "fhevm-zama-fhevm-validator:8545"
+tendermintNode: "fhevm-zama-fhevm-validator"
+
+startBlock: "0"  # Starting block number
+chunkSize: 30000
+compression:
+  type: "zstd"
+  level: 3
+rowGroupSize: 30000
+
+autoscaling:
+  enabled: false
