@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   config.toml: |
-    rpc_endpoint = "https://rpc.sepolia.org"
+    rpc_endpoint = "http://192.168.68.140:8545"
     blocks_in_memory = 1000
     rotation_blocks = 10000
     metrics_port = 9090
