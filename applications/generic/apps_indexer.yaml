@@ -20,7 +20,7 @@ spec:
           blocksInMemory: 1000
           rotationBlocks: 10000
           metricsPort: 9090
-          startBlock: 20000000
+          startBlock: "20000000"
         resources:
           requests:
             cpu: 250m
