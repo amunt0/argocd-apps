@@ -5,7 +5,6 @@ image:
 
 persistence:
   size: 5Gi
-  storageClass: standard
 
 resources:
   requests:
