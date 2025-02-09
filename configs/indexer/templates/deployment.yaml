@@ -21,17 +21,9 @@ spec:
             - name: CONFIG_PATH
               value: "/etc/eth-indexer/config.toml"
             - name: RUST_LOG
-              value: "info"
+              value: "info,eth_high_perf_indexer=debug"
             - name: RUST_BACKTRACE
               value: "1"
-          command: ["/bin/sh"]  # Temporarily override for debugging
-          args: 
-            - -c
-            - |
-              ls -la /etc/eth-indexer/
-              cat /etc/eth-indexer/config.toml
-              echo "Starting indexer..."
-              eth-high-perf-indexer
           ports:
             - name: metrics
               containerPort: {{ .Values.metrics.port }}
