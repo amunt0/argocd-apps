@@ -15,11 +15,11 @@ spec:
           repository: ghcr.io/amunt0/evm-indexer
           tag: latest
         indexer:
-          rpcEndpoint: ""          # Will be set in ArgoCD
-          blocksInMemory: 1000     # Default value
-          rotationBlocks: 10000    # Default value
-          metricsPort: 9090       # Default value
-          startBlock: 0           # Will be set in ArgoCD
+          rpcEndpoint: "http://192.168.68.140:8545"
+          blocksInMemory: 1000
+          rotationBlocks: 10000
+          metricsPort: 9090
+          startBlock: 21000000
   destination:
     server: https://kubernetes.default.svc
     namespace: fhevm

@@ -15,11 +15,11 @@ resources:
     memory: 1Gi
 
 indexer:
-  rpcEndpoint: "http://localhost:8545"
-  blocksInMemory: 1000
-  rotationBlocks: 10000
-  metricsPort: 9090
-  startBlock: 20000000
+  rpcEndpoint: ""          # Will be set in ArgoCD
+  blocksInMemory: 1000     # Default value
+  rotationBlocks: 10000    # Default value
+  metricsPort: 9090       # Default value
+  startBlock: 0           # Will be set in ArgoCD
 
 metrics:
   port: 9090
