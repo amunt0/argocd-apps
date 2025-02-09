@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: evm-indexer
-  namespace: your-namespace
+  namespace: fhevm
   annotations:
     keel.sh/policy: force  # Force update the image
     keel.sh/trigger: poll  # Poll for image updates
