@@ -9,6 +9,11 @@ spec:
     repoURL: https://github.com/amunt0/argocd-apps 
     targetRevision: HEAD
     path: configs/indexer/
+    helm:
+      values: |
+        image:
+          repository: ghcr.io/amunt0/evm-indexer
+          tag: latest
   destination:
     server: https://kubernetes.default.svc
     namespace: fhevm
