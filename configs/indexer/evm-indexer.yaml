@@ -19,5 +19,5 @@ spec:
     spec:
       containers:
         - name: evm-indexer
-          image: ghcr.io/amunt0/evm-indexer:latest
+          image: ghcr.io/amunt0/evm-indexer:v4207abbdf78fe3a5b365f6b538c81939e8fe34c7
           imagePullPolicy: Always
