@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: evm-indexer-config
+  namespace: {{ .Release.Namespace }}
+data:
+  config.toml: |
+    rpc_endpoint = "https://rpc.sepolia.org"
+    blocks_in_memory = 1000
+    rotation_blocks = 10000
+    metrics_port = 9090
+    data_dir = "/data/eth-indexer"
