@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: evm-indexer
+  namespace: argo-system
+spec:
+  project: apps
+  source:
+    repoURL: https://github.com/amunt0/argocd-apps 
+    targetRevision: HEAD
+    path: configs/deployments/evm-indexer.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: fhevm
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
