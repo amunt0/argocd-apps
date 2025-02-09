@@ -14,5 +14,12 @@ resources:
     cpu: 500m
     memory: 1Gi
 
+indexer:
+  rpcEndpoint: "http://localhost:8545"
+  blocksInMemory: 1000
+  rotationBlocks: 10000
+  metricsPort: 9090
+  startBlock: 20000000
+
 metrics:
   port: 9090
