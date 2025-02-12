@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: monitoring
-  namespace: argo-system
+  namespace: argocd
 spec:
   description: Monitoring tools
   sourceRepos:
