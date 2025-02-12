@@ -14,7 +14,7 @@ resource "helm_release" "argo_cd" {
 
 # Wait for ArgoCD to be ready
 resource "time_sleep" "wait_for_argo" {
-  depends_on = [helm_release.argo_cd]
+  depends_on      = [helm_release.argo_cd]
   create_duration = "30s"
 }
 
@@ -30,11 +30,11 @@ resource "null_resource" "apply_projects" {
   provisioner "local-exec" {
     command = <<-EOF
       kubectl wait --for=condition=available --timeout=60s deployment/argo-cd-argocd-server -n ${var.namespace}
-      for file in ${path.module}/../../projects/*.yaml; do
+      for file in ${path.module}/../projects/*.yaml; do
         envsubst < $file | kubectl apply -f -
       done
     EOF
-    
+
     environment = {
       argo_cd_namespace = var.namespace
     }
@@ -48,22 +48,22 @@ resource "null_resource" "apply_applications" {
   triggers = {
     # This will change whenever any yaml file in the applications directories changes
     root_apps_hash = sha1(join("", [
-      for f in fileset("${path.module}/../../applications", "*.yaml") : filesha1("${path.module}/../../applications/${f}")
+      for f in fileset("${path.module}/../applications", "*.yaml") : filesha1("${path.module}/../../applications/${f}")
     ]))
     generic_apps_hash = sha1(join("", [
-      for f in fileset("${path.module}/../../applications/generic", "*.yaml") : filesha1("${path.module}/../../applications/generic/${f}")
+      for f in fileset("${path.module}/../applications/generic", "*.yaml") : filesha1("${path.module}/../../applications/generic/${f}")
     ]))
   }
 
   provisioner "local-exec" {
     command = <<-EOF
       # Apply root applications
-      for file in ${path.module}/../../applications/*.yaml; do
+      for file in ${path.module}/../applications/*.yaml; do
         envsubst < $file | kubectl apply -f -
       done
       
       # Apply generic applications
-      for file in ${path.module}/../../applications/generic/*.yaml; do
+      for file in ${path.module}/../applications/generic/*.yaml; do
         envsubst < $file | kubectl apply -f -
       done
     EOF
@@ -73,3 +73,4 @@ resource "null_resource" "apply_applications" {
     }
   }
 }
+
