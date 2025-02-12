@@ -2,14 +2,14 @@ apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: system
-  namespace: argo-system
+  namespace: argocd
 spec:
   description: System tools
   sourceRepos:
-    - '*'
+    - "*"
   destinations:
-    - namespace: '*'
+    - namespace: "*"
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
-    - group: '*'
-      kind: '*'
+    - group: "*"
+      kind: "*"

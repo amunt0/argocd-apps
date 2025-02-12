@@ -2,14 +2,14 @@ apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: apps
-  namespace: argo-system
+  namespace: argocd
 spec:
   description: Application workloads
   sourceRepos:
-    - '*'
+    - "*"
   destinations:
-    - namespace: '*'
+    - namespace: "*"
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
-    - group: '*'
-      kind: '*'
+    - group: "*"
+      kind: "*"
