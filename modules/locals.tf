@@ -1,4 +1,29 @@
 locals {
+
+
+  # Define minimum required apps
+  minimum_apps = [
+    "system_metric-server"
+  ]
+
+  # Cloud specific apps mapping
+  cloud_apps = {
+    aws      = ["system_alb"]
+    gcp      = []
+    azure    = []
+    alicloud = []
+    metal    = []
+  }
+
+  # Combine all apps to deploy
+  apps_to_deploy = distinct(concat(
+    local.minimum_apps,
+    try(local.cloud_apps[var.cloud_provider], []),
+    var.additional_apps
+  ))
+
+
+  #argocd values
   default_values = {
     crds = {
       install = true

@@ -1,0 +1,29 @@
+# applications/metal/system_metallb.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: metallb
+  namespace: ${argo_cd_namespace}
+spec:
+  project: system
+  source:
+    repoURL: https://metallb.github.io/metallb
+    targetRevision: 0.13.12 # Adjust version as needed
+    chart: metallb
+    helm:
+      values: |
+        # Configure your IP ranges here
+        addressPools:
+        - name: default
+          protocol: layer2
+          addresses:
+          - 192.168.1.240-192.168.1.250  # Adjust to your network
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: metallb-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

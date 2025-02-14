@@ -28,3 +28,21 @@ variable "additional_values" {
   type        = any
   default     = null
 }
+
+variable "cloud_provider" {
+  description = "Cloud provider (aws, gcp, azure, alicloud, metal)"
+  type        = string
+  default     = "metal" # Default
+
+  validation {
+    condition     = contains(["aws", "gcp", "azure", "alicloud", "metal", ""], var.cloud_provider)
+    error_message = "Valid values for cloud_provider are: aws, gcp, azure, alicloud, metal, or empty string"
+  }
+}
+
+variable "additional_apps" {
+  description = "List of additional applications to deploy beyond the minimum set"
+  type        = list(string)
+  default     = []
+}
+
