@@ -4,7 +4,7 @@ metadata:
   name: crossplane
   namespace: argocd
 spec:
-  project: default
+  project: system
   source:
     repoURL: https://charts.crossplane.io/stable
     chart: crossplane
@@ -33,7 +33,7 @@ spec:
 
         # RBAC configurations
         rbacManager:
-          deploy: true
+          deploy: false # true
           managementPolicy: Basic
 
         # Metrics and monitoring
