@@ -62,10 +62,3 @@ spec:
       - CreateNamespace=true
       - ServerSideApply=true # Ensures proper handling of complex CRDs
 
-  # Health check configurations
-  healthChecks:
-    - group: apiextensions.crossplane.io
-      kind: Composition
-      httpGet:
-        path: /healthz
-        port: 9443
