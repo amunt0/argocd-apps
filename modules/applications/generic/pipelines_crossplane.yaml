@@ -1,0 +1,71 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://charts.crossplane.io/stable
+    chart: crossplane
+    targetRevision: "1.14.5" # Latest stable version as of 2024
+    helm:
+      values: |
+        replicas: 1
+        resourcesCrossplane:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            memory: 512Mi
+
+        # Provider configurations
+        provider:
+          packages:
+            - crossplane/provider-kubernetes
+            - crossplane/provider-helm
+            # Uncomment below when moving to AWS
+            # - crossplane/provider-aws:v0.47.0
+
+        # Bare metal specific configurations
+        deploymentStrategy:
+          type: Recreate
+
+        # RBAC configurations
+        rbacManager:
+          deploy: true
+          managementPolicy: Basic
+
+        # Metrics and monitoring
+        metrics:
+          enabled: true
+
+        # Cache configurations
+        cache:
+          enabled: true
+          ttl: 30m
+
+        # For bare metal persistence
+        persistence:
+          enabled: true
+          size: 5Gi
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crossplane
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true # Ensures proper handling of complex CRDs
+
+  # Health check configurations
+  healthChecks:
+    - group: apiextensions.crossplane.io
+      kind: Composition
+      httpGet:
+        path: /healthz
+        port: 9443
