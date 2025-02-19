@@ -28,12 +28,12 @@ spec:
             # - crossplane/provider-aws:v0.47.0
 
         # Bare metal specific configurations
-        deploymentStrategy:
-          type: Recreate
+        deployment:
+          strategy: Recreate
 
         # RBAC configurations
         rbacManager:
-          deploy: true
+          deploy: false
           managementPolicy: Basic
 
         # Metrics and monitoring
