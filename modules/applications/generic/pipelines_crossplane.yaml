@@ -33,7 +33,7 @@ spec:
 
         # RBAC configurations
         rbacManager:
-          deploy: false # true
+          deploy: true
           managementPolicy: Basic
 
         # Metrics and monitoring
