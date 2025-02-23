@@ -12,7 +12,7 @@ spec:
     chart: external-dns
     helm:
       values: |
-        provider: coredns
+        provider: etcd
         policy: sync
         domainFilters:
           - "home"
@@ -21,14 +21,10 @@ spec:
           - ingress
           - service
 
-        args:
-          - --source=service
-          - --source=ingress
-          - --provider=coredns
-          - --domain-filter=home
-          - --txt-owner-id=home-cluster
-          - --etcd-endpoints=http://192.168.68.64:2379
-          - --etcd-prefix=/skydns
+        etcd:
+          endpoints:
+            - http://192.168.68.64:2379
+          prefix: /skydns
 
         rbac:
           create: true
