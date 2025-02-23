@@ -11,44 +11,36 @@ spec:
     chart: external-dns
     helm:
       values: |
-        # Match the deployment spec
         provider: coredns
         logLevel: debug
         sources:
           - ingress
 
+        args:
+          - --source=ingress
+          - --provider=coredns
+          - --log-level=debug
+          - --etcd-urls=http://192.168.68.64:2379
+
         env:
           - name: ETCD_URLS
             value: http://192.168.68.64:2379
 
-        # Match the RBAC rules
+        deploymentStrategy:
+          type: Recreate
+
         rbac:
           create: true
-          clusterRole: true
-          additionalPermissions:
-            - apiGroups: [""]
-              resources: ["services","endpoints","pods"]
-              verbs: ["get","watch","list"]
-            - apiGroups: ["extensions","networking.k8s.io"]
-              resources: ["ingresses"]
-              verbs: ["get","watch","list"]
-            - apiGroups: [""]
-              resources: ["nodes"]
-              verbs: ["list"]
 
         serviceAccount:
           create: true
           name: external-dns
 
-        # Match deployment labels and strategy
-        deploymentStrategy:
-          type: Recreate
+        podLabels:
+          app: external-dns
 
         nameOverride: "external-dns"
         fullnameOverride: "external-dns"
-
-        podLabels:
-          app: external-dns
 
   destination:
     server: https://kubernetes.default.svc
