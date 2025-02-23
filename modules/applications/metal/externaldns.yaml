@@ -45,7 +45,7 @@ spec:
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: kube-system
+    namespace: external-dns
   syncPolicy:
     automated:
       prune: true
