@@ -1,0 +1,20 @@
+# applications/argocd/ingress.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-ingress
+  namespace: argocd
+spec:
+  project: system
+  source:
+    repoURL: https://github.com/amunt0/argocd-apps
+    targetRevision: HEAD
+    path: configs/argocd
+    kustomize: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
