@@ -1,11 +1,10 @@
-# configs/coredns/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: coredns-custom
   namespace: kube-system
 data:
-  home.override: |
+  Corefile: |
     . {
         hosts {
             192.168.68.64 nas.home
