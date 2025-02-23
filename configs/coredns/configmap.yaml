@@ -1,10 +1,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: coredns-custom # This is mounted as custom-config-volume
+  name: coredns-custom
   namespace: kube-system
 data:
-  custom.server: | # Using .server instead of .override
+  home.server: |
     home {
-        forward . 1.1.1.1 8.8.8.8
+        file /etc/coredns/home.db
+        errors
+        log
     }
