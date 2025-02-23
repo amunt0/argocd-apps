@@ -1,38 +1,30 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: external-dns
-  namespace: ${argo_cd_namespace}
-spec:
-  project: system
-  source:
-    repoURL: https://kubernetes-sigs.github.io/external-dns/
-    chart: external-dns
-    targetRevision: 1.14.1
-    helm:
-      values: |
-        provider: rfc2136
-        domainFilters:
-          - "home"
-        txtOwnerId: "home-cluster"
-        sources:
-          - ingress
-          - service
-        rfc2136:
-          host: "coredns.kube-system"  # Adjust to your CoreDNS service
-          port: 53
-          zone: "home."
-          insecure: true  # For internal DNS, this is usually fine
-        policy: sync
-        logLevel: debug  # Keep debug logging until we confirm it works
-        interval: "1m"
-        registry: txt
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: external-dns
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+project: system
+source:
+  repoURL: "https://kubernetes-sigs.github.io/external-dns/"
+  targetRevision: 1.14.1
+  helm:
+    values: |
+      provider: coredns
+      policy: sync
+      domainFilters:
+        - "home"
+      txtOwnerId: "home-cluster"
+      sources:
+        - ingress
+        - service
+      coredns:
+        etcdEndpoints: []  # Remove etcd dependency
+        corednsPrefix: ""  # Remove prefix
+      logLevel: debug
+      interval: "1m"
+      registry: txt
+  chart: external-dns
+destination:
+  server: "https://kubernetes.default.svc"
+  namespace: external-dns
+syncPolicy:
+  automated:
+    prune: true
+    selfHeal: true
+  syncOptions:
+    - CreateNamespace=true

@@ -8,16 +8,14 @@ data:
   home.override: |
     home {
         hosts {
-            # K3s cluster services will be managed by ExternalDNS
-            
             # Static entries for other servers
             192.168.68.64 nas.home
-            # Add future servers here like:
             # 192.168.68.65 server2.home
-            # 192.168.68.66 server3.home
-            
             fallthrough
         }
+        file /etc/coredns/home.db home {
+            reload 5s
+        }    
         forward . 1.1.1.1 8.8.8.8
         cache 30
         loop
