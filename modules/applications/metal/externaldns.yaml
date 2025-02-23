@@ -1,9 +1,8 @@
-# applications/dns/externaldns.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: external-dns
-  namespace: ${argo_cd_namespace}
+  namespace: argocd
 spec:
   project: system
   source:
@@ -20,10 +19,11 @@ spec:
           - ingress
           - service
         coredns:
-          etcdEndpoints: "" # Remove etcd dependency
-          corednsPrefix: "" # Remove default /skydns prefix
+          host: "coredns.kube-system" # Adjust this to your CoreDNS service name/namespace
+          port: 53
+          protocol: "dns"
         policy: sync
-        logLevel: debug # Temporarily increase logging
+        logLevel: debug
         interval: "1m"
         registry: txt
   destination:
@@ -35,4 +35,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-
