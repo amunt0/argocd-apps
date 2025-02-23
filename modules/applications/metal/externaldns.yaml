@@ -11,7 +11,7 @@ spec:
     chart: external-dns
     helm:
       values: |
-        provider: etcd
+        provider: coredns
         policy: sync
         domainFilters:
           - "home"
@@ -19,14 +19,8 @@ spec:
         sources:
           - ingress
           - service
-        etcd:
-          endpoints:
-            - http://192.168.68.64:2379
-          prefix: /skydns
-        rbac:
-          create: true
-        nodeSelector:
-          kubernetes.io/hostname: nas
+        log-level:
+          - debug
   destination:
     server: "https://kubernetes.default.svc"
     namespace: external-dns
