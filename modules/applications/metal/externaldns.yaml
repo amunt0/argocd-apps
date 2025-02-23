@@ -22,6 +22,7 @@ spec:
           - service
         coredns:
           etcdEndpoints: "http://127.0.0.1:2379"
+          etcdCorednsPrefix: "/skydns"
   destination:
     server: https://kubernetes.default.svc
     namespace: external-dns
