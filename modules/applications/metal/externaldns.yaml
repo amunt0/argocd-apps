@@ -6,9 +6,9 @@ metadata:
 spec:
   project: system
   source:
-    repoURL: https://github.com/amunt0/argocd-apps # Your repo
+    repoURL: https://github.com/amunt0/argocd-apps
     targetRevision: HEAD
-    path: configs/external-dns # You'll create this directory
+    path: configs/external-dns
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
