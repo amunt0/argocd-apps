@@ -1,3 +1,4 @@
+# configs/coredns/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -27,15 +28,18 @@ data:
         loop
         reload 5s
         loadbalance
-        log  # Add logging
+        log
     }
     home:53 {
-        errors
-        log  # Add logging
+        errors {
+            consolidate
+        }
+        debug  # Add debug logging
+        log    # Add query logging
         etcd {
             stubzones
             path /skydns
-            endpoint http://192.168.68.64:2379
+            endpoint http://127.0.0.1:2379  # Try localhost since we see it's listening there
             fallthrough
         }
         prometheus :9153
