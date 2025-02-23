@@ -22,9 +22,21 @@ spec:
             - --source=ingress
             - --provider=coredns
             - --log-level=debug
-            - --domain-filter=home # Add domain filter
-            - --txt-owner-id=k3s # Add explicit owner ID
-            - --interval=30s
           env:
             - name: ETCD_URLS
-              value: http://192.168.68.64:2379
+              value: https://192.168.68.64:2379
+            - name: ETCD_CERT_FILE
+              value: /etc/kubernetes/pki/etcd/client.crt
+            - name: ETCD_KEY_FILE
+              value: /etc/kubernetes/pki/etcd/client.key
+            - name: ETCD_CA_FILE
+              value: /etc/kubernetes/pki/etcd/peer-ca.crt
+          volumeMounts:
+            - name: etcd-certs
+              mountPath: /etc/kubernetes/pki/etcd
+              readOnly: true
+      volumes:
+        - name: etcd-certs
+          hostPath:
+            path: /var/lib/rancher/k3s/server/tls/etcd
+            type: Directory

@@ -1,4 +1,3 @@
-# configs/coredns/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -28,15 +27,15 @@ data:
         loop
         reload 5s
         loadbalance
-        log
+        log  # Add logging
     }
     home:53 {
         errors
-        debug
-        log
+        log  # Add logging
         etcd {
-            path /coredns # Changed path
-            endpoint unix:///var/run/k3s/etcd/server.sock  # Try unix socket
+            stubzones
+            path /skydns
+            endpoint http://192.168.68.64:2379
             fallthrough
         }
         prometheus :9153
