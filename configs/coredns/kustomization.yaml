@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: kube-system
 resources:
   - configmap.yaml
+  - deployment.yaml
 
 patches:
   - path: deployment-patch.yaml
