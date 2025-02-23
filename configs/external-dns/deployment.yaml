@@ -22,6 +22,8 @@ spec:
             - --source=ingress
             - --provider=coredns
             - --log-level=debug
+            - --request-timeout=30s # Add timeout setting
+            - --etcd-timeout=30s # Add etcd specific timeout
           env:
             - name: ETCD_URLS
               value: http://192.168.68.64:2379
