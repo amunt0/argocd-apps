@@ -35,7 +35,7 @@ data:
         etcd {
             stubzones
             path /skydns
-            endpoint http://192.168.68.64:2379
+            endpoint http://etcd.kube-system:2379
             fallthrough
         }
         prometheus :9153
