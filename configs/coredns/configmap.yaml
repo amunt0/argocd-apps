@@ -31,15 +31,12 @@ data:
         log
     }
     home:53 {
-        errors {
-            consolidate
-        }
-        debug  # Add debug logging
-        log    # Add query logging
+        errors
+        debug
+        log
         etcd {
-            stubzones
             path /skydns
-            endpoint http://127.0.0.1:2379  # Try localhost since we see it's listening there
+            endpoint http://127.0.0.1:2379
             fallthrough
         }
         prometheus :9153
