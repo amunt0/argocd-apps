@@ -21,14 +21,40 @@ spec:
           - ingress
           - service
         coredns:
-          etcdEndpoints: "http://192.168.68.64:2379"  # Changed to your NAS IP
+          etcdEndpoints: "http://192.168.68.64:2379"
           etcdCorednsPrefix: "/skydns"
+
+        # RBAC configuration
+        rbac:
+          create: true
+          
+        serviceAccount:
+          create: true
+          name: external-dns
+          
+        # Additional args for etcd
+        extraArgs:
+          - --etcd-urls=http://192.168.68.64:2379
+          
+        # Security context
+        podSecurityContext:
+          fsGroup: 65534
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 65532
+          
+        nodeSelector:
+          kubernetes.io/hostname: nas
+          
         tolerations:
         - key: "node-role.kubernetes.io/control-plane"
           operator: "Exists"
           effect: "NoSchedule"
-        nodeSelector:
-          node-role.kubernetes.io/control-plane: "true"
+        - key: "node-role.kubernetes.io/master"
+          operator: "Exists"
+          effect: "NoSchedule"
+
   destination:
     server: https://kubernetes.default.svc
     namespace: external-dns
