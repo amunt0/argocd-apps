@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik-config
+  namespace: argocd
+spec:
+  project: system
+  source:
+    repoURL: https://github.com/amunt0/argocd-apps # Your repo
+    targetRevision: HEAD
+    path: configs/traefik
+    kustomize: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: traefik
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
