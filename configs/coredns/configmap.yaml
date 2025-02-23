@@ -29,6 +29,19 @@ data:
         loadbalance
     }
     home:53 {
+        file /etc/coredns/home.db {
+            reload 5s
+        }
+        prometheus :9153
+        cache 30
+    }ntial
+        }
+        cache 30
+        loop
+        reload 5s
+        loadbalance
+    }
+    home:53 {
         prometheus :9153
         forward . /etc/resolv.conf
         cache 30
