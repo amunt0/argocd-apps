@@ -12,54 +12,24 @@ spec:
     helm:
       values: |
         provider: coredns
-        policy: sync
-        domainFilters:
-          - "home"
-        txtOwnerId: "home-cluster"
+        logLevel: debug
         sources:
           - ingress
           - service
-        log-level:
-          - debug
+
+        env:
+          - name: ETCD_URLS
+            value: http://192.168.68.64:2379
+
+        strategy:
+          type: Recreate
+
   destination:
-    server: "https://kubernetes.default.svc"
-    namespace: external-dns
+    server: https://kubernetes.default.svc
+    namespace: kube-system
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
----
-# RBAC for ExternalDNS to access Kubernetes resources
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: external-dns
-rules:
-  - apiGroups: [""]
-    resources: ["services", "pods", "endpoints"]
-    verbs: ["get", "watch", "list"]
-  - apiGroups: ["networking.k8s.io"]
-    resources: ["ingresses"]
-    verbs: ["get", "watch", "list"]
-  - apiGroups: ["extensions"]
-    resources: ["ingresses"]
-    verbs: ["get", "watch", "list"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: external-dns-view
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: external-dns
-subjects:
-  - kind: ServiceAccount
-    name: external-dns
-    namespace: external-dns
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: external-dns
-  namespace: external-dns
+    syncOptions:
+      - CreateNamespace=true
