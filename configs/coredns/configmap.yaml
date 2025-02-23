@@ -1,3 +1,4 @@
+# configs/coredns/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -30,8 +31,10 @@ data:
     }
     home:53 {
         etcd {
+            stubzones
             path /skydns
-            endpoint http://127.0.0.1:2379
+            endpoint http://192.168.68.64:2379
+            fallthrough
         }
         prometheus :9153
         cache 30

@@ -1,9 +1,0 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: coredns
-  namespace: kube-system
-  annotations:
-    argocd.argoproj.io/sync-options: Replace=true
-spec:
-  replicas: 3
