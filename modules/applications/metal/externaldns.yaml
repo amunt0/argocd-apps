@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: external-dns
-  namespace: argocd
+  namespace: ${argo_cd_namespace}
 spec:
   project: system
   source:
@@ -11,19 +11,20 @@ spec:
     targetRevision: 1.14.1
     helm:
       values: |
-        provider: coredns
+        provider: rfc2136
         domainFilters:
           - "home"
         txtOwnerId: "home-cluster"
         sources:
           - ingress
           - service
-        coredns:
-          host: "coredns.kube-system" # Adjust this to your CoreDNS service name/namespace
+        rfc2136:
+          host: "coredns.kube-system"  # Adjust to your CoreDNS service
           port: 53
-          protocol: "dns"
+          zone: "home."
+          insecure: true  # For internal DNS, this is usually fine
         policy: sync
-        logLevel: debug
+        logLevel: debug  # Keep debug logging until we confirm it works
         interval: "1m"
         registry: txt
   destination:
