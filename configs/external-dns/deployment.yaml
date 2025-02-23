@@ -22,6 +22,7 @@ spec:
             - --source=ingress
             - --provider=coredns
             - --log-level=debug
+            - --etcd-prefix=/skydns
           env:
             - name: ETCD_URLS
               value: http://etcd.kube-system:2379

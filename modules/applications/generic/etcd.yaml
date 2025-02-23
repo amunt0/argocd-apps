@@ -7,7 +7,7 @@ spec:
   project: system
   source:
     repoURL: https://charts.bitnami.com/bitnami
-    targetRevision: 8.10.4
+    targetRevision: 11.0.8
     chart: etcd
     helm:
       values: |
