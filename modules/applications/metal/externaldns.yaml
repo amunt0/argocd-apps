@@ -3,17 +3,16 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: external-dns
-  namespace: argocd
+  namespace: ${argo_cd_namespace}
 spec:
   project: system
   source:
     repoURL: https://kubernetes-sigs.github.io/external-dns/
-    targetRevision: 1.14.1
     chart: external-dns
+    targetRevision: 1.14.1
     helm:
       values: |
         provider: coredns
-        policy: sync
         domainFilters:
           - "home"
         txtOwnerId: "home-cluster"
@@ -21,7 +20,12 @@ spec:
           - ingress
           - service
         coredns:
-          etcdEndpoints: "http://coredns.kube-system:53"
+          etcdEndpoints: "" # Remove etcd dependency
+          corednsPrefix: "" # Remove default /skydns prefix
+        policy: sync
+        logLevel: debug # Temporarily increase logging
+        interval: "1m"
+        registry: txt
   destination:
     server: https://kubernetes.default.svc
     namespace: external-dns
