@@ -21,14 +21,14 @@ spec:
           - ingress
           - service
 
-        extraEnv:
-          - name: ETCD_ENDPOINTS
-            value: http://192.168.68.64:2379
-
-        # CoreDNS specific configuration
-        coredns:
-          etcdEndpoints: http://192.168.68.64:2379
-          etcdCorednsPrefix: /skydns
+        args:
+          - --source=service
+          - --source=ingress
+          - --provider=coredns
+          - --domain-filter=home
+          - --txt-owner-id=home-cluster
+          - --etcd-endpoints=http://192.168.68.64:2379
+          - --etcd-prefix=/skydns
 
         rbac:
           create: true
