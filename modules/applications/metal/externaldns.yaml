@@ -1,5 +1,4 @@
 # applications/dns/externaldns.yaml
-# applications/dns/externaldns.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -22,23 +21,17 @@ spec:
           - ingress
           - service
 
-        # Explicit environment variables for etcd configuration
-        env:
-          - name: ETCD_URLS
+        extraEnv:
+          - name: ETCD_ENDPOINTS
             value: http://192.168.68.64:2379
 
-        # Additional arguments for etcd configuration
-        extraArgs:
-          - --etcd-urls=http://192.168.68.64:2379
-          - --coredns-prefix=/skydns
+        # CoreDNS specific configuration
+        coredns:
+          etcdEndpoints: http://192.168.68.64:2379
+          etcdCorednsPrefix: /skydns
 
         rbac:
           create: true
 
         nodeSelector:
           kubernetes.io/hostname: nas
-
-        tolerations:
-        - key: "node-role.kubernetes.io/control-plane"
-          operator: "Exists"
-          effect: "NoSchedule"
