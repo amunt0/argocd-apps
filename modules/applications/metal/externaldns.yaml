@@ -1,4 +1,3 @@
-# applications/dns/externaldns.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -20,14 +19,53 @@ spec:
         sources:
           - ingress
           - service
-
         etcd:
           endpoints:
             - http://192.168.68.64:2379
           prefix: /skydns
-
         rbac:
           create: true
-
         nodeSelector:
           kubernetes.io/hostname: nas
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: external-dns
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+---
+# RBAC for ExternalDNS to access Kubernetes resources
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: external-dns
+rules:
+  - apiGroups: [""]
+    resources: ["services", "pods", "endpoints"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["extensions"]
+    resources: ["ingresses"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: external-dns-view
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: external-dns
+subjects:
+  - kind: ServiceAccount
+    name: external-dns
+    namespace: external-dns
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: external-dns
+  namespace: external-dns
