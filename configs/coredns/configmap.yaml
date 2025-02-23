@@ -4,8 +4,8 @@ metadata:
   name: coredns-custom
   namespace: kube-system
 data:
-  Corefile: |
-    . {
+  custom.override: | # Changed from home.override to custom.override
+    home {
         hosts {
             192.168.68.64 nas.home
             fallthrough
@@ -15,5 +15,4 @@ data:
         loop
         reload
         log
-        errors
     }
