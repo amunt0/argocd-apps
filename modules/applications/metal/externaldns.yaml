@@ -6,44 +6,9 @@ metadata:
 spec:
   project: system
   source:
-    repoURL: https://kubernetes-sigs.github.io/external-dns/
-    targetRevision: 1.14.1
-    chart: external-dns
-    helm:
-      values: |
-        nameOverride: "external-dns"
-        fullnameOverride: "external-dns"
-
-        commonLabels:
-          app: external-dns
-
-        podLabels:
-          app: external-dns
-
-        selector:
-          matchLabels:
-            app: external-dns
-
-        # Basic configuration
-        provider: coredns
-        logLevel: debug
-        sources:
-          - ingress
-
-        # Main container configuration
-        extraEnv:
-          - name: ETCD_URLS
-            value: http://192.168.68.64:2379
-
-        deploymentStrategy:
-          type: Recreate
-
-        # Container arguments
-        containerArgs:
-          - --source=ingress
-          - --provider=coredns
-          - --log-level=debug
-
+    repoURL: https://github.com/amunt0/argocd-apps # Your repo
+    targetRevision: HEAD
+    path: configs/external-dns # You'll create this directory
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
