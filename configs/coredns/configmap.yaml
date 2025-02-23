@@ -13,9 +13,6 @@ data:
             # 192.168.68.65 server2.home
             fallthrough
         }
-        file /etc/coredns/home.db home {
-            reload 5s
-        }    
         forward . 1.1.1.1 8.8.8.8
         cache 30
         loop
