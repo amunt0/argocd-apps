@@ -1,3 +1,4 @@
+# configs/coredns/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -5,9 +6,8 @@ metadata:
   namespace: kube-system
 data:
   home.override: |
-    .:53 {
-        hosts /etc/coredns/hosts {
-            # Static entries for other servers
+    . {
+        hosts {
             192.168.68.64 nas.home
             fallthrough
         }
@@ -17,11 +17,4 @@ data:
         reload
         log
         errors
-    }
-    home:53 {
-        log
-        errors
-        cache 30
-        file /etc/coredns/home.db
-        forward . 1.1.1.1 8.8.8.8
     }
