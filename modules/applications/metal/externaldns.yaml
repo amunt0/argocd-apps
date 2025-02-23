@@ -11,22 +11,28 @@ spec:
     chart: external-dns
     helm:
       values: |
+        # Override the default labels
+        nameOverride: "external-dns"
         fullnameOverride: "external-dns"
 
-        # Exactly match the working deployment
-        deploymentStrategy:
-          type: Recreate
-
-        # Match the selector and labels
-        selector:
+        # Match labels exactly
+        commonLabels:
           app: external-dns
+
         podLabels:
           app: external-dns
 
-        # Match the container configuration
-        image:
-          repository: registry.k8s.io/external-dns/external-dns
-          tag: "v0.15.0"
+        # Override the selector
+        selector:
+          matchLabels:
+            app: external-dns
+
+        # Exactly match container args
+        sources:
+          - ingress
+
+        provider: coredns
+        logLevel: debug
 
         args:
           - --source=ingress
@@ -37,15 +43,22 @@ spec:
           - name: ETCD_URLS
             value: http://192.168.68.64:2379
 
-        # Strip out unnecessary config
-        resources: {}
-        serviceAccount:
-          create: true
-          name: external-dns
+        deploymentStrategy:
+          type: Recreate
+
+        # Strip out all probes and security context
+        livenessProbe:
+          enabled: false
+        readinessProbe:
+          enabled: false
+
+        securityContext: {}
+        podSecurityContext: {}
+        containerSecurityContext: {}
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: external-dns
+    namespace: kube-system # Changed to kube-system
   syncPolicy:
     automated:
       prune: true
