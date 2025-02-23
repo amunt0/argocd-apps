@@ -6,7 +6,7 @@ metadata:
 spec:
   project: system
   source:
-    repoURL: https://charts.bitnami.com/bitnami
+    repoURL: oci://registry-1.docker.io/bitnamicharts
     targetRevision: 11.0.8
     chart: etcd
     helm:
