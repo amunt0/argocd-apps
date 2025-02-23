@@ -1,33 +1,19 @@
-# applications/dns/externaldns.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: external-dns
-  namespace: argocd
+  name: coredns-custom
+  namespace: ${argo_cd_namespace}
 spec:
   project: system
   source:
-    repoURL: https://kubernetes-sigs.github.io/external-dns/
-    targetRevision: 1.14.1
-    chart: external-dns
-    helm:
-      values: |
-        provider: etcd
-        policy: sync
-        domainFilters:
-          - "home"
-        txtOwnerId: "home-cluster"
-        sources:
-          - ingress
-          - service
-
-        etcd:
-          endpoints:
-            - http://192.168.68.64:2379
-          prefix: /skydns
-
-        rbac:
-          create: true
-
-        nodeSelector:
-          kubernetes.io/hostname: nas
+    repoURL: https://github.com/amunt0/argocd-apps
+    targetRevision: HEAD
+    path: configs/coredns
+    kustomize: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

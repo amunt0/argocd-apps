@@ -37,4 +37,20 @@ data:
         prometheus :9153
         cache 30
         reload 5s
+    }resolv.conf {
+            policy sequential
+        }
+        cache 30
+        loop
+        reload 5s
+        loadbalance
+    }
+    home:53 {
+        etcd {
+            path /skydns
+            endpoint http://127.0.0.1:2379
+        }
+        prometheus :9153
+        cache 30
+        reload 5s
     }
