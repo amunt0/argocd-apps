@@ -21,8 +21,14 @@ spec:
           - ingress
           - service
         coredns:
-          etcdEndpoints: "http://127.0.0.1:2379"
+          etcdEndpoints: "http://192.168.68.64:2379"  # Changed to your NAS IP
           etcdCorednsPrefix: "/skydns"
+        tolerations:
+        - key: "node-role.kubernetes.io/control-plane"
+          operator: "Exists"
+          effect: "NoSchedule"
+        nodeSelector:
+          node-role.kubernetes.io/control-plane: "true"
   destination:
     server: https://kubernetes.default.svc
     namespace: external-dns
