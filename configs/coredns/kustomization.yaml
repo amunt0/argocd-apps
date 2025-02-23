@@ -4,12 +4,4 @@ kind: Kustomization
 namespace: kube-system
 resources:
   - configmap.yaml
-patches:
-  - target:
-      kind: Deployment
-      name: coredns
-      namespace: kube-system
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 3
+  - deployment-patch.yaml
