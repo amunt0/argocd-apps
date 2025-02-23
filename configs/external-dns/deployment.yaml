@@ -23,8 +23,6 @@ spec:
             - --provider=coredns
             - --log-level=debug
             - --domain-filter=home # Add domain filter
-            - --etcd-prefix=/skydns
-            - --etcd-urls=http://192.168.68.64:2379
             - --txt-owner-id=k3s # Add explicit owner ID
             - --interval=30s
           env:
