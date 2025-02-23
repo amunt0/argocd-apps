@@ -35,8 +35,8 @@ data:
         debug
         log
         etcd {
-            path /skydns
-            endpoint http://127.0.0.1:2379
+            path /coredns # Changed path
+            endpoint unix:///var/run/k3s/etcd/server.sock  # Try unix socket
             fallthrough
         }
         prometheus :9153
