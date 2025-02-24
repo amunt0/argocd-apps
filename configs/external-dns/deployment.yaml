@@ -22,7 +22,7 @@ spec:
             - --source=ingress
             - --provider=coredns
             - --log-level=debug
-            - --etcd-prefix=/skydns
+            - --domain-filter=home # Add domain filter
           env:
             - name: ETCD_URLS
-              value: http://etcd.kube-system:2379
+              value: http://192.168.68.64:2379
