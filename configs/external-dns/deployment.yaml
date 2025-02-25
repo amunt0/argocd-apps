@@ -23,9 +23,7 @@ spec:
             - --source=ingress
             - --provider=coredns
             - --registry=etcd
-            - --etcd-urls=http://etcd.kube-system.svc.cluster.local:2379
             - --domain-filter=home
-            - --txt-owner-id=k3s
             - --log-level=debug
               #    - --provider=coredns
               #- --log-level=debug
