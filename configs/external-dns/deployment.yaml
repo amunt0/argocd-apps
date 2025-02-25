@@ -27,6 +27,7 @@ spec:
             - --domain-filter=home
             - --log-level=debug
             - --request-timeout=30s # Add timeout parameter
+            - --etcd-urls=http://etcd.kube-system.svc.cluster.local:2379 # Move from env to arg
           env:
             - name: ETCD_URLS
               value: http://etcd.kube-system.svc.cluster.local:2379
