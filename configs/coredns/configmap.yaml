@@ -27,19 +27,20 @@ data:
         loop
         reload 5s
         loadbalance
-        log  # Add logging
+        log
     }
     home:53 {
         errors
-        log  # Add logging
+        log
         etcd {
             stubzones
             path /skydns
-            endpoint https://192.168.68.64:2379
-            tls /etc/coredns/etcd-client/ca.crt /etc/coredns/etcd-client/client.crt /etc/coredns/etcd-client/client.key
+            endpoint http://etcd.kube-system.svc.cluster.local:2379
             fallthrough
         }
         prometheus :9153
         cache 30
         reload 5s
     }
+  NodeHosts: |
+    127.0.0.1 localhost
