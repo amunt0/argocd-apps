@@ -26,6 +26,7 @@ spec:
             - --txt-owner-id=k3s
             - --domain-filter=home
             - --log-level=debug
+            - --request-timeout=30s # Add timeout parameter
           env:
             - name: ETCD_URLS
               value: http://etcd.kube-system.svc.cluster.local:2379
