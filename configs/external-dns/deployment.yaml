@@ -22,12 +22,10 @@ spec:
             - --source=service
             - --source=ingress
             - --provider=coredns
-            - --registry=etcd
+            - --registry=txt
+            - --txt-owner-id=k3s
             - --domain-filter=home
             - --log-level=debug
-              #    - --provider=coredns
-              #- --log-level=debug
-              #- --domain-filter=home # Add domain filter
           env:
             - name: ETCD_URLS
               value: http://etcd.kube-system.svc.cluster.local:2379
