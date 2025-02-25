@@ -35,7 +35,8 @@ data:
         etcd {
             stubzones
             path /skydns
-            endpoint http://192.168.68.64:2379
+            endpoint https://192.168.68.64:2379
+            tls /etc/coredns/etcd-client/ca.crt /etc/coredns/etcd-client/client.crt /etc/coredns/etcd-client/client.key
             fallthrough
         }
         prometheus :9153

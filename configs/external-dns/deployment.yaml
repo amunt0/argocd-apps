@@ -20,9 +20,15 @@ spec:
           image: registry.k8s.io/external-dns/external-dns:v0.15.0
           args:
             - --source=ingress
-            - --provider=coredns
-            - --log-level=debug
-            - --domain-filter=home # Add domain filter
+            - --registry=etcd
+            - --etcd-urls=https://192.168.68.64:2379
+            - --etcd-ssl-ca=/etc/etcd/ssl/ca.crt
+            - --etcd-ssl-cert=/etc/etcd/ssl/client.crt
+            - --etcd-ssl-key=/etc/etcd/ssl/client.key
+
+            #    - --provider=coredns
+            #- --log-level=debug
+            #- --domain-filter=home # Add domain filter
           env:
             - name: ETCD_URLS
               value: http://192.168.68.64:2379

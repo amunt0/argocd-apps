@@ -39,3 +39,6 @@ spec:
             items:
               - key: Corefile
                 path: Corefile
+        - name: etcd-client-certs # Add this
+          secret:
+            secretName: etcd-certs
