@@ -1,0 +1,32 @@
+# configs/etcd/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: etcd
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: etcd
+  template:
+    metadata:
+      labels:
+        app: etcd
+    spec:
+      containers:
+        - name: etcd
+          image: quay.io/coreos/etcd:v3.5.6
+          ports:
+            - containerPort: 2379
+          command:
+            - /usr/local/bin/etcd
+            - --data-dir=/var/lib/etcd
+            - --listen-client-urls=http://0.0.0.0:2379
+            - --advertise-client-urls=http://etcd.kube-system.svc.cluster.local:2379
+          volumeMounts:
+            - name: etcd-data
+              mountPath: /var/lib/etcd
+      volumes:
+        - name: etcd-data
+          emptyDir: {}
