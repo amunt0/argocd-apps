@@ -9,6 +9,10 @@ metadata:
     kubernetes.io/ingress.class: "traefik"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
     traefik.ingress.kubernetes.io/router.tls: "true"
+    # ExternalDNS annotations
+    external-dns.alpha.kubernetes.io/enabled: "true"
+    external-dns.alpha.kubernetes.io/hostname: "minio.home"
+    external-dns.alpha.kubernetes.io/ttl: "60"
 spec:
   tls:
     - hosts:
@@ -36,6 +40,10 @@ metadata:
     kubernetes.io/ingress.class: "traefik"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
     traefik.ingress.kubernetes.io/router.tls: "true"
+    # ExternalDNS annotations
+    external-dns.alpha.kubernetes.io/enabled: "true"
+    external-dns.alpha.kubernetes.io/hostname: "console.minio.home"
+    external-dns.alpha.kubernetes.io/ttl: "60"
 spec:
   tls:
     - hosts:
