@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: https://github.com/amunt0/argocd-apps
     targetRevision: HEAD
-    path: configs/metallb
+    path: configs/metalb
   destination:
     server: https://kubernetes.default.svc
     namespace: metallb-system
