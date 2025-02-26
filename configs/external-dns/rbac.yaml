@@ -1,4 +1,3 @@
-# configs/external-dns/rbac.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
