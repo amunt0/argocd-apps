@@ -5,6 +5,6 @@ namespace: kube-system
 resources:
   - configmap.yaml
   - deployment.yaml
-
+  - service.yaml # Add this line
 patches:
   - path: deployment-patch.yaml
