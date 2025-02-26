@@ -6,7 +6,10 @@ metadata:
   namespace: storage
   labels:
     app: minio
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: "minio.home,console.minio.home"
 spec:
+  type: LoadBalancer
   ports:
     - port: 9000
       targetPort: 9000
