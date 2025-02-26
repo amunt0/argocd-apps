@@ -1,0 +1,12 @@
+# configs/argocd/values.yaml
+server:
+  config:
+    url: https://argocd.home
+  insecure: true # Because we're terminating TLS at the ingress level
+
+dex:
+  enabled: false
+
+configs:
+  params:
+    server.insecure: true
