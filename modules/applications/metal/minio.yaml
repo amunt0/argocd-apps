@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: minio
+  namespace: ${argo_cd_namespace}
+spec:
+  project: system
+  source:
+    repoURL: https://github.com/amunt0/argocd-apps
+    targetRevision: HEAD
+    path: configs/minio
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: storage
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,12 @@
+# configs/minio/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: minio-config
+  namespace: storage
+data:
+  MINIO_VOLUMES: "/data1:/data2:/data3:/data4:/data5"
+  MINIO_EC_PARITY: "2" # RAID5-like configuration with 2 parity disks
+  MINIO_DOMAIN: "minio.home"
+  MINIO_PROMETHEUS_URL: "http://prometheus-server.monitoring.svc.cluster.local:9090"
+  MINIO_PROMETHEUS_JOB_ID: "minio"
