@@ -33,9 +33,14 @@ data:
         errors
         log
         etcd {
-            stubzones
             path /skydns
             endpoint http://etcd.kube-system.svc.cluster.local:2379
+            fallthrough
+        }
+        # Add hosts file as backup/alternative
+        hosts {
+            192.168.71.11 minio.home console.minio.home
+            192.168.71.12 argocd.home
             fallthrough
         }
         prometheus :9153
