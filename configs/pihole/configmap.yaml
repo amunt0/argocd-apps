@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pihole-custom-settings
+  namespace: dns
+data:
+  FTLCONF_LOCAL_IPV4: "0.0.0.0"
+  WEB_PORT: "80"
+  DNS_BOGUS_PRIV: "true"
+  DNS_FQDN_REQUIRED: "true"
+  DNSSEC: "true"
+  CONDITIONAL_FORWARDING: "false"
+  WEBPASSWORD: "changeme"  # Change this or use a Secret instead for production
+  TZ: "UTC"

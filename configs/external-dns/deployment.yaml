@@ -21,16 +21,20 @@ spec:
           args:
             - --source=service
             - --source=ingress
-            - --provider=coredns
+            - --provider=rfc2136
             - --registry=txt
             - --txt-owner-id=k3s
             - --domain-filter=home
             - --log-level=debug
             - --request-timeout=30s
-            - --coredns-prefix=/skydns/
             - --interval=30s
+            - --rfc2136-host=pihole.dns.svc.cluster.local
+            - --rfc2136-port=53
+            - --rfc2136-zone=home
+            - --rfc2136-tsig-secret=none
+            - --rfc2136-tsig-secret-alg=hmac-sha256
+            - --rfc2136-tsig-keyname=externaldns-key
+            - --rfc2136-tsig-axfr
           env:
-            - name: ETCD_URLS
-              value: http://etcd.kube-system.svc.cluster.local:2379
             - name: NO_PROXY
               value: "10.43.0.0/16,192.168.0.0/16"
