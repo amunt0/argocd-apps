@@ -1,15 +1,22 @@
-# applications/metal/system_metallb.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: metallb
-  namespace: ${argo_cd_namespace}
+  namespace: argocd
 spec:
   project: system
   source:
-    repoURL: https://github.com/amunt0/argocd-apps
-    targetRevision: HEAD
-    path: configs/metallb
+    repoURL: https://metallb.github.io/metallb
+    targetRevision: 0.14.9
+    chart: metallb
+    helm:
+      values: |
+        # Configure your IP ranges here
+        addressPools:
+        - name: default
+          protocol: layer2
+          addresses:
+          - 192.168.71.10-192.168.71.250  # Adjust to your network
   destination:
     server: https://kubernetes.default.svc
     namespace: metallb-system
@@ -17,3 +24,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
