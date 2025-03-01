@@ -2,14 +2,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: metalb-config
+  name: metallb
   namespace: ${argo_cd_namespace}
 spec:
   project: system
   source:
     repoURL: https://github.com/amunt0/argocd-apps
     targetRevision: HEAD
-    path: configs/metalb
+    path: configs/metallb
   destination:
     server: https://kubernetes.default.svc
     namespace: metallb-system
