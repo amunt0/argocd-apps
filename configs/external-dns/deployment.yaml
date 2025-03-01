@@ -21,7 +21,7 @@ spec:
           args:
             - --source=service
             - --source=ingress
-            - --provider=txt
+            - --provider=inmemory
             - --registry=txt
             - --txt-owner-id=k3s
             - --domain-filter=home
