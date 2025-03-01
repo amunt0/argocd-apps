@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: external-dns
-  namespace: dns
+  namespace: kube-system
 spec:
   selector:
     matchLabels:
@@ -21,16 +21,17 @@ spec:
           args:
             - --source=service
             - --source=ingress
-            - --provider=webhook
-            - --webhook-provider-url=http://pihole-updater.dns.svc.cluster.local:8080
+            - --provider=txt
             - --registry=txt
             - --txt-owner-id=k3s
             - --domain-filter=home
             - --log-level=debug
+            - --txt-prefix=externaldns-
+            - --interval=1m
           volumeMounts:
             - name: config-volume
               mountPath: /etc/external-dns
       volumes:
         - name: config-volume
           configMap:
-            name: external-dns-webhook-config
+            name: external-dns-config
