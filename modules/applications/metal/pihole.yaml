@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kube-system
+  name: pihole
   namespace: argocd
 spec:
   project: system
@@ -11,7 +11,7 @@ spec:
     path: configs/pihole
   destination:
     server: https://kubernetes.default.svc
-    namespace: dns
+    namespace: kube-system
   syncPolicy:
     automated:
       prune: true

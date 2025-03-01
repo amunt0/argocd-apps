@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: metallb-config
+  name: metalb-config
   namespace: ${argo_cd_namespace}
 spec:
   project: system
