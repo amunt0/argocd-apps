@@ -23,7 +23,7 @@ spec:
             - --source=ingress
             - --provider=pihole
             - --registry=noop
-            - --pihole-server=http://pihole.dns.svc.cluster.local
+            - --pihole-server=http://192.168.71.53
           securityContext:
             fsGroup: 65534
           envFrom:
