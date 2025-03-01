@@ -24,7 +24,7 @@ spec:
             - --provider=pihole
             - --registry=noop
             - --policy=upsert-only
-            - --pihole-server=http://192.168.71.53
+            - --pihole-server=http://pihole.dns.svc.cluster.local
             - --log-level=debug
           securityContext:
             fsGroup: 65534
