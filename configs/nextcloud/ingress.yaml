@@ -1,5 +1,6 @@
 
 apiVersion: networking.k8s.io/v1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nextcloud
@@ -9,6 +10,9 @@ metadata:
     kubernetes.io/ingress.class: "traefik"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
     traefik.ingress.kubernetes.io/router.tls: "true"
+    # Headers for Nextcloud security
+    traefik.ingress.kubernetes.io/router.middlewares: media-nextcloud-headers@kubernetescrd
+    # ExternalDNS annotations
     external-dns.alpha.kubernetes.io/enabled: "true"
     external-dns.alpha.kubernetes.io/hostname: "nextcloud.home"
     external-dns.alpha.kubernetes.io/ttl: "60"
@@ -25,6 +29,30 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: nextcloud
+                name: nextcloud-server-lb
                 port:
-                  name: http
+                  number: 443
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: nextcloud-headers
+  namespace: media
+spec:
+  headers:
+    frameDeny: true
+    browserXssFilter: true
+    customResponseHeaders:
+      Strict-Transport-Security: "15552000"
+      X-Frame-Options: SAMEORIGIN
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: nextcloud-redirects
+  namespace: media
+spec:
+  redirectRegex:
+    regex: https://(.*)/.well-known/(card|cal)dav
+    replacement: https://$1/remote.php/dav/
+

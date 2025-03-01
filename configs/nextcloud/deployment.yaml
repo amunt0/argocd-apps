@@ -3,7 +3,10 @@ kind: Deployment
 metadata:
   name: nextcloud
   namespace: media
+  labels:
+    app: nextcloud
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: nextcloud
@@ -14,6 +17,19 @@ spec:
       labels:
         app: nextcloud
     spec:
+      initContainers:
+        - name: init-data-dirs
+          image: alpine:latest
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /var/www/html/data/external
+              chmod 770 /var/www/html/data/external
+              echo "Initialization complete"
+          volumeMounts:
+            - name: nextcloud-data
+              mountPath: /var/www/html/data
       containers:
         - name: nextcloud
           image: nextcloud:apache
@@ -39,26 +55,19 @@ spec:
               value: "512M"
             - name: PHP_UPLOAD_LIMIT
               value: "512M"
+            - name: TRUSTED_PROXIES
+              value: "10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+            - name: APACHE_DISABLE_REWRITE_IP
+              value: "1"
+            - name: OVERWRITEHOST
+              value: "nextcloud.home"
+            - name: OVERWRITEPROTOCOL
+              value: "https"
           volumeMounts:
             - name: config
               mountPath: /var/www/html/config
             - name: nextcloud-data
               mountPath: /var/www/html/data
-            # Mount MinIO buckets to external path
-            - name: movies
-              mountPath: /mnt/external/movies
-            - name: series
-              mountPath: /mnt/external/series  
-            - name: pictures
-              mountPath: /mnt/external/pictures
-            - name: configs
-              mountPath: /mnt/external/configs
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              memory: 512Mi
           lifecycle:
             postStart:
               exec:
@@ -67,14 +76,49 @@ spec:
                   - -c
                   - |
                     # Wait for Nextcloud to initialize
-                    until [ -f /var/www/html/config/config.php ]; do sleep 5; done
-                    echo "Nextcloud initialized, creating directory links..."
-                    mkdir -p /var/www/html/data/external
-                    ln -sf /mnt/external/movies /var/www/html/data/external/movies
-                    ln -sf /mnt/external/series /var/www/html/data/external/series
-                    ln -sf /mnt/external/pictures /var/www/html/data/external/pictures
-                    ln -sf /mnt/external/configs /var/www/html/data/external/configs
-                    echo "Symlinks created successfully"
+                    until [ -f /var/www/html/config/config.php ]; do 
+                      echo "Waiting for Nextcloud to initialize..."
+                      sleep 10
+                    done
+                    
+                    # Create script to mount external storage
+                    cat > /tmp/mount_external_storage.php << 'EOF'
+                    <?php
+                    require_once '/var/www/html/lib/base.php';
+                    
+                    // Wait for full initialization
+                    while (!\OC::$server->getSystemConfig()->getValue('installed', false)) {
+                      echo "Waiting for Nextcloud to fully initialize...\n";
+                      sleep(10);
+                    }
+                    
+                    echo "Nextcloud is fully initialized. Proceeding with external storage setup...\n";
+                    
+                    // Get necessary services
+                    $appManager = \OC::$server->getAppManager();
+                    
+                    // Enable external storage app if not already enabled
+                    if (!$appManager->isEnabledForUser('files_external')) {
+                      echo "Enabling external storage app...\n";
+                      $appManager->enableApp('files_external');
+                    }
+                    
+                    echo "External storage setup completed!\n";
+                    EOF
+                    
+                    # Wait a bit more to ensure database is fully set up
+                    sleep 30
+                    
+                    # Execute the script
+                    php /tmp/mount_external_storage.php
+                    
+                    echo "Nextcloud post-initialization complete"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -82,20 +126,3 @@ spec:
         - name: nextcloud-data
           persistentVolumeClaim:
             claimName: nextcloud-data-pvc
-        # Host path volumes pointing to mounted MinIO buckets
-        - name: movies
-          hostPath:
-            path: /mnt/minio/movies
-            type: Directory
-        - name: series
-          hostPath:
-            path: /mnt/minio/series
-            type: Directory
-        - name: pictures
-          hostPath:
-            path: /mnt/minio/pictures
-            type: Directory
-        - name: configs
-          hostPath:
-            path: /mnt/minio/configs
-            type: Directory
