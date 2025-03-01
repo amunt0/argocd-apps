@@ -10,5 +10,12 @@ data:
   DNS_FQDN_REQUIRED: "true"
   DNSSEC: "true"
   CONDITIONAL_FORWARDING: "false"
-  WEBPASSWORD: "changeme"  # Change this or use a Secret instead for production
+  WEBPASSWORD: "changeme" 
   TZ: "UTC"
+  # Add these for .home domain
+  PIHOLE_DOMAIN: "home"
+  DHCP_ACTIVE: "false"
+  REV_SERVER: "true"
+  REV_SERVER_CIDR: "192.168.0.0/16"
+  REV_SERVER_TARGET: "192.168.68.1"  # Your router's IP
+  REV_SERVER_DOMAIN: "home"

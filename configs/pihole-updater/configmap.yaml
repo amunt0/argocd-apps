@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pihole-updater-script
+  namespace: dns
+data:
+  update-dns.sh: |
+    #!/bin/bash
+    
+    # Extract data from webhook JSON
+    action=$(jq -r '.action' $1)
+    name=$(jq -r '.name' $1)
+    domain=$(jq -r '.domain' $1)
+    ip=$(jq -r '.targets[0]' $1)
+    
+    # Build the DNS record
+    hostname="${name}.${domain}"
+    
+    # Pi-hole custom DNS file
+    CUSTOM_LIST="/etc/pihole/custom.list"
+    
+    # Check if entry exists
+    if grep -q "${hostname}" ${CUSTOM_LIST}; then
+      if [ "$action" == "delete" ]; then
+        # Remove the entry
+        sed -i "/^.*${hostname}$/d" ${CUSTOM_LIST}
+        echo "{ \"success\": true, \"message\": \"Deleted ${hostname}\" }"
+      else
+        # Update the entry
+        sed -i "s/^.* ${hostname}$/${ip} ${hostname}/" ${CUSTOM_LIST}
+        echo "{ \"success\": true, \"message\": \"Updated ${hostname} to ${ip}\" }"
+      fi
+    else
+      if [ "$action" == "delete" ]; then
+        echo "{ \"success\": true, \"message\": \"${hostname} not found, nothing to delete\" }"
+      else
+        # Add new entry
+        echo "${ip} ${hostname}" >> ${CUSTOM_LIST}
+        echo "{ \"success\": true, \"message\": \"Added ${hostname} with IP ${ip}\" }"
+      fi
+    fi
+    
+    # Reload Pi-hole DNS
+    pihole restartdns reload-lists > /dev/null

@@ -21,20 +21,16 @@ spec:
           args:
             - --source=service
             - --source=ingress
-            - --provider=rfc2136
+            - --provider=webhook
+            - --webhook-provider-url=http://pihole-updater.dns.svc.cluster.local:8080
             - --registry=txt
             - --txt-owner-id=k3s
             - --domain-filter=home
             - --log-level=debug
-            - --request-timeout=30s
-            - --interval=30s
-            - --rfc2136-host=pihole.dns.svc.cluster.local
-            - --rfc2136-port=53
-            - --rfc2136-zone=home
-            - --rfc2136-tsig-secret=none
-            - --rfc2136-tsig-secret-alg=hmac-sha256
-            - --rfc2136-tsig-keyname=externaldns-key
-            - --rfc2136-tsig-axfr
-          env:
-            - name: NO_PROXY
-              value: "10.43.0.0/16,192.168.0.0/16"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/external-dns
+      volumes:
+        - name: config-volume
+          configMap:
+            name: external-dns-webhook-config

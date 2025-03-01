@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole-updater
+  namespace: dns
+spec:
+  selector:
+    matchLabels:
+      app: pihole-updater
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: pihole-updater
+    spec:
+      containers:
+      - name: updater
+        image: nginx:alpine
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          apk add --no-cache jq bash curl
+          cat > /usr/local/bin/webhook.sh << 'EOF'
+          #!/bin/bash
+          while true; do
+            content=$(nc -l -p 8080)
+            echo "$content" | grep -q "POST /webhook" || continue
+            body=$(echo "$content" | grep -v "^POST\|^User-Agent\|^Host\|^Content-" | tail -n 1)
+            echo "$body" > /tmp/data.json
+            result=$(/update-dns.sh /tmp/data.json)
+            echo -e "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n$result" | nc -l -p 8080
+          done
+          EOF
+          chmod +x /usr/local/bin/webhook.sh
+          cp /configmap/update-dns.sh /update-dns.sh
+          chmod +x /update-dns.sh
+          /usr/local/bin/webhook.sh
+        volumeMounts:
+        - name: pihole-data
+          mountPath: /etc/pihole
+        - name: config-script
+          mountPath: /configmap
+      volumes:
+      - name: pihole-data
+        persistentVolumeClaim:
+          claimName: pihole-data
+      - name: config-script
+        configMap:
+          name: pihole-updater-script

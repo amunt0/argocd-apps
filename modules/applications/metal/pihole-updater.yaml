@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: external-dns
+  name: pihole-updater
   namespace: argocd
 spec:
   project: system
   source:
     repoURL: https://github.com/amunt0/argocd-apps
     targetRevision: HEAD
-    path: configs/external-dns
+    path: configs/pihole-updater
   destination:
     server: https://kubernetes.default.svc
     namespace: dns
@@ -16,3 +16,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
