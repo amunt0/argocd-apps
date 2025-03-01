@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dns-sync
+  namespace: dns
+spec:
+  selector:
+    matchLabels:
+      app: dns-sync
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dns-sync
+    spec:
+      containers:
+      - name: dns-sync
+        image: alpine:latest
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          apk add --no-cache bash jq bind-tools curl
+          while true; do
+            echo "Syncing DNS records..."
+            # Query TXT records
+            records=$(dig @kube-dns.kube-system.svc.cluster.local TXT externaldns-txt.home +short)
+            echo "Found records: $records"
+            
+            # Process each record
+            for record in $records; do
+              # Parse the TXT record
+              clean_record=$(echo $record | tr -d '"')
+              name=$(echo $clean_record | cut -d',' -f1)
+              ip=$(echo $clean_record | cut -d',' -f2)
+              
+              if [[ $name != "heritage"* && $name != "external-dns"* ]]; then
+                echo "Updating $name.$domain to $ip"
+                
+                # Add to Pi-hole
+                if grep -q "$name.home" /etc/pihole/custom.list; then
+                  # Update existing record
+                  sed -i "s/^.* $name.home$/$ip $name.home/" /etc/pihole/custom.list
+                else
+                  # Add new record
+                  echo "$ip $name.home" >> /etc/pihole/custom.list
+                fi
+              fi
+            done
+            
+            # Reload Pi-hole
+            pihole restartdns reload-lists > /dev/null 2>&1
+            
+            # Wait before next sync
+            sleep 300
+          done
+        volumeMounts:
+        - name: pihole-data
+          mountPath: /etc/pihole
+      volumes:
+      - name: pihole-data
+        persistentVolumeClaim:
+          claimName: pihole-data
