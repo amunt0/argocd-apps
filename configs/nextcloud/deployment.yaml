@@ -30,13 +30,11 @@ spec:
                 secretKeyRef:
                   name: postgres-creds
                   key: username
-                  namespace: data
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: postgres-creds
                   key: password
-                  namespace: data
             - name: PHP_MEMORY_LIMIT
               value: "512M"
             - name: PHP_UPLOAD_LIMIT
@@ -46,21 +44,37 @@ spec:
               mountPath: /var/www/html/config
             - name: nextcloud-data
               mountPath: /var/www/html/data
-            # Mount MinIO buckets directly
+            # Mount MinIO buckets to external path
             - name: movies
-              mountPath: /var/www/html/mnt/minio/movies
+              mountPath: /mnt/external/movies
             - name: series
-              mountPath: /var/www/html/mnt/minio/series
+              mountPath: /mnt/external/series  
             - name: pictures
-              mountPath: /var/www/html/mnt/minio/pictures
+              mountPath: /mnt/external/pictures
             - name: configs
-              mountPath: /var/www/html/mnt/minio/configs
+              mountPath: /mnt/external/configs
           resources:
             requests:
               cpu: 100m
               memory: 128Mi
             limits:
               memory: 512Mi
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    # Wait for Nextcloud to initialize
+                    until [ -f /var/www/html/config/config.php ]; do sleep 5; done
+                    echo "Nextcloud initialized, creating directory links..."
+                    mkdir -p /var/www/html/data/external
+                    ln -sf /mnt/external/movies /var/www/html/data/external/movies
+                    ln -sf /mnt/external/series /var/www/html/data/external/series
+                    ln -sf /mnt/external/pictures /var/www/html/data/external/pictures
+                    ln -sf /mnt/external/configs /var/www/html/data/external/configs
+                    echo "Symlinks created successfully"
       volumes:
         - name: config
           persistentVolumeClaim:
