@@ -4,3 +4,4 @@ namespace: dns
 resources:
   - deployment.yaml
   - rbac.yaml
+  - configmap.yaml
