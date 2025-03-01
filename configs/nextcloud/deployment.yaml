@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextcloud
+  namespace: media
+spec:
+  selector:
+    matchLabels:
+      app: nextcloud
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: nextcloud
+    spec:
+      containers:
+        - name: nextcloud
+          image: nextcloud:apache
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            - name: POSTGRES_HOST
+              value: postgres.data.svc.cluster.local
+            - name: POSTGRES_DB
+              value: mediadb
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-creds
+                  key: username
+                  namespace: data
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-creds
+                  key: password
+                  namespace: data
+            - name: PHP_MEMORY_LIMIT
+              value: "512M"
+            - name: PHP_UPLOAD_LIMIT
+              value: "512M"
+          volumeMounts:
+            - name: config
+              mountPath: /var/www/html/config
+            - name: nextcloud-data
+              mountPath: /var/www/html/data
+            # Mount MinIO buckets directly
+            - name: movies
+              mountPath: /var/www/html/mnt/minio/movies
+            - name: series
+              mountPath: /var/www/html/mnt/minio/series
+            - name: pictures
+              mountPath: /var/www/html/mnt/minio/pictures
+            - name: configs
+              mountPath: /var/www/html/mnt/minio/configs
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: nextcloud-config-pvc
+        - name: nextcloud-data
+          persistentVolumeClaim:
+            claimName: nextcloud-data-pvc
+        # Host path volumes pointing to mounted MinIO buckets
+        - name: movies
+          hostPath:
+            path: /mnt/minio/movies
+            type: Directory
+        - name: series
+          hostPath:
+            path: /mnt/minio/series
+            type: Directory
+        - name: pictures
+          hostPath:
+            path: /mnt/minio/pictures
+            type: Directory
+        - name: configs
+          hostPath:
+            path: /mnt/minio/configs
+            type: Directory

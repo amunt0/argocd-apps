@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextcloud
+  namespace: media
+  labels:
+    app: nextcloud
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: "nextcloud.home"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
+  selector:
+    app: nextcloud
