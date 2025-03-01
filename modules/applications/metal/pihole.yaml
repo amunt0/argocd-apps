@@ -11,8 +11,10 @@ spec:
     path: configs/pihole
   destination:
     server: https://kubernetes.default.svc
-    namespace: kube-system
+    namespace: dns
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true        
