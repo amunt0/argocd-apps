@@ -17,6 +17,8 @@ spec:
       labels:
         app: nextcloud
     spec:
+      securityContext:
+        fsGroup: 33  # www-data group
       initContainers:
         - name: wait-for-db
           image: postgres:13-alpine
@@ -51,15 +53,16 @@ spec:
                 secretKeyRef:
                   name: nextcloud-db-creds
                   key: password
-        - name: init-data-dirs
+        - name: fix-permissions
           image: alpine:latest
           command:
             - sh
             - -c
             - |
-              mkdir -p /var/www/html/data/external
-              chmod 770 /var/www/html/data/external
-              echo "Data directory initialization complete"
+              mkdir -p /var/www/html/data
+              chmod 0770 /var/www/html/data
+              chown 33:33 /var/www/html/data  # www-data:www-data
+              echo "Data directory permissions set to 0770"
           volumeMounts:
             - name: nextcloud-data
               mountPath: /var/www/html/data
@@ -135,6 +138,9 @@ spec:
               port: http
             initialDelaySeconds: 60
             periodSeconds: 15
+          securityContext:
+            runAsUser: 33  # www-data
+            runAsGroup: 33  # www-data
           lifecycle:
             postStart:
               exec:
@@ -142,64 +148,63 @@ spec:
                   - /bin/sh
                   - -c
                   - |
-                    # Wait for Nextcloud to initialize
-                    until [ -f /var/www/html/config/config.php ]; do 
-                      echo "Waiting for Nextcloud to initialize..."
+                    # Wait for Nextcloud to be installed
+                    while [ ! -f /var/www/html/config/config.php ]; do
+                      echo "Waiting for Nextcloud installation to complete..."
                       sleep 10
                     done
                     
-                    # Wait a bit more to ensure database is fully set up
-                    sleep 30
+                    echo "Nextcloud has been installed. Now configuring..."
                     
-                    # Create MinIO configuration
-                    cat > /var/www/html/config/s3.config.php << 'EOF'
-                    <?php
-                    $CONFIG = [
-                      'objectstore' => [
-                        'class' => '\\OC\\Files\\ObjectStore\\S3',
-                        'arguments' => [
-                          'bucket' => 'nextcloud',
-                          'autocreate' => true,
-                          'key' => 'admin',
-                          'secret' => 'minio123SecurePassword!@#',
-                          'hostname' => '192.168.68.64',
-                          'port' => 9000,
-                          'use_ssl' => false,
-                          'use_path_style' => true,
-                        ],
-                      ],
-                    ];
+                    # Wait a bit to ensure everything is ready
+                    sleep 20
+                    
+                    # Fix permissions again to be sure
+                    chmod 0770 /var/www/html/data
+                    
+                    # Now that NextCloud is installed, configure S3 storage
+                    cat >> /var/www/html/config/config.php << 'EOF'
+                    
+                    // S3 configuration
+                    $CONFIG['objectstore'] = array(
+                      'class' => '\\OC\\Files\\ObjectStore\\S3',
+                      'arguments' => array(
+                        'bucket' => 'nextcloud',
+                        'autocreate' => true,
+                        'key' => 'admin',
+                        'secret' => 'minio123SecurePassword!@#',
+                        'hostname' => '192.168.68.64',
+                        'port' => 9000,
+                        'use_ssl' => false,
+                        'use_path_style' => true,
+                      ),
+                    );
+                    
+                    // Redis configuration
+                    $CONFIG['memcache.distributed'] = '\\OC\\Memcache\\Redis';
+                    $CONFIG['memcache.local'] = '\\OC\\Memcache\\APCu';
+                    $CONFIG['redis'] = array(
+                      'host' => 'redis.data.svc.cluster.local',
+                      'port' => 6379,
+                    );
                     EOF
                     
-                    # Create Redis configuration
-                    cat > /var/www/html/config/redis.config.php << 'EOF'
-                    <?php
-                    $CONFIG = [
-                      'memcache.distributed' => '\\OC\\Memcache\\Redis',
-                      'memcache.local' => '\\OC\\Memcache\\APCu',
-                      'redis' => [
-                        'host' => 'redis.data.svc.cluster.local',
-                        'port' => 6379,
-                      ],
-                    ];
-                    EOF
+                    echo "Configuration files added. Repairing NextCloud installation..."
+                    php /var/www/html/occ maintenance:repair --no-interaction
                     
-                    # Run occ maintenance:repair to apply configurations
-                    echo "Running maintenance:repair to apply configurations..."
-                    php /var/www/html/occ maintenance:repair
+                    # The apps can only be enabled after the S3 configuration is applied
+                    echo "Enabling apps..."
+                    php /var/www/html/occ app:enable files_external --no-interaction || echo "Could not enable files_external"
+                    php /var/www/html/occ app:enable files_external_s3 --no-interaction || echo "Could not enable files_external_s3"
                     
-                    # Enable required apps
-                    echo "Enabling required apps..."
-                    php /var/www/html/occ app:enable files_external
-                    php /var/www/html/occ app:enable files_external_s3
-                    
-                    echo "Nextcloud post-initialization complete"
+                    echo "NextCloud post-installation configuration complete!"
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 200m
+              memory: 256Mi
             limits:
-              memory: 512Mi
+              cpu: 1000m
+              memory: 1Gi
       volumes:
         - name: config
           persistentVolumeClaim:
