@@ -11,6 +11,9 @@ metadata:
     external-dns.alpha.kubernetes.io/enabled: "true"
     external-dns.alpha.kubernetes.io/hostname: "argocd.home"
     external-dns.alpha.kubernetes.io/ttl: "60"
+    # Add these annotations for better ArgoCD compatibility
+    traefik.ingress.kubernetes.io/preserve-host: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: "argocd-argocd-middleware@kubernetescrd"
 spec:
   tls:
     - hosts:
@@ -24,6 +27,18 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: argocd-server-lb # Change this from argo-cd-argocd-server
+                name: argocd-server-lb
                 port:
-                  number: 443 # Match this to your LoadBalancer service port
+                  number: 443
+
+---
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: argocd-middleware
+  namespace: argocd
+spec:
+  headers:
+    customRequestHeaders:
+      X-Forwarded-Proto: "https"
