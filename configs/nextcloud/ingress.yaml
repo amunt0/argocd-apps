@@ -49,4 +49,4 @@ spec:
       X-XSS-Protection: "1; mode=block"
       Referrer-Policy: "no-referrer"
       X-Frame-Options: "SAMEORIGIN"
-      Strict-Transport-Security: "max-age=15552000; includeSubDomains"
+        #      Strict-Transport-Security: "max-age=15552000; includeSubDomains"
