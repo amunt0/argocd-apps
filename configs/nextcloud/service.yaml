@@ -23,14 +23,18 @@ metadata:
   annotations:
     external-dns.alpha.kubernetes.io/hostname: "nextcloud.home"
     external-dns.alpha.kubernetes.io/ingress-hostname-source: "service-annotation-only"
+  labels:
+    app: nextcloud
 spec:
   selector:
     app: nextcloud
   ports:
     - port: 80
       targetPort: 80
+      protocol: TCP
       name: http
     - port: 443
       targetPort: 80
+      protocol: TCP
       name: https
   type: LoadBalancer

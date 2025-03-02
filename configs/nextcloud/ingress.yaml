@@ -11,12 +11,12 @@ metadata:
     external-dns.alpha.kubernetes.io/enabled: "true"
     external-dns.alpha.kubernetes.io/hostname: "nextcloud.home"
     external-dns.alpha.kubernetes.io/ttl: "60"
-    # Add these Traefik specific annotations
+    # Nextcloud-specific annotations
     traefik.ingress.kubernetes.io/preserve-host: "true"
     traefik.ingress.kubernetes.io/pass-client-headers: "true"
-    # Nextcloud-specific settings
+    # Fix for redirect loops and authentication issues
     traefik.ingress.kubernetes.io/request-timeout: "300s"
-    # Reference to the security headers middleware
+    # Use direct middleware reference format
     traefik.ingress.kubernetes.io/middlewares: "media-nextcloud-security-headers@kubernetescrd"
 spec:
   tls:
@@ -49,4 +49,4 @@ spec:
       X-XSS-Protection: "1; mode=block"
       Referrer-Policy: "no-referrer"
       X-Frame-Options: "SAMEORIGIN"
-      Strict-Transport-Security: "max-age=15552000; includeSubDomains"         
+      Strict-Transport-Security: "max-age=15552000; includeSubDomains"
