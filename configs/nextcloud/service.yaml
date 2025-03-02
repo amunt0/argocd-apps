@@ -21,8 +21,7 @@ metadata:
   name: nextcloud-lb
   namespace: media
   annotations:
-    metallb.universe.tf/allow-shared-ip: "true"
-    metallb.universe.tf/loadBalancerIPs: "192.168.71.13"    
+    metallb.tf/loadBalancerIPs: "192.168.71.13"    
     external-dns.alpha.kubernetes.io/hostname: "nextcloud.home"
     external-dns.alpha.kubernetes.io/ingress-hostname-source: "service-annotation-only"
   labels:
