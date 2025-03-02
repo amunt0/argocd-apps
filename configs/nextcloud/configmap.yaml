@@ -19,21 +19,18 @@ data:
         
         SetEnv HOME /var/www/html
         SetEnv HTTP_HOME /var/www/html
+        
+        # Enable large file uploads
+        <IfModule mod_php7.c>
+          php_value upload_max_filesize 16G
+          php_value post_max_size 16G
+          php_value max_input_time 3600
+          php_value max_execution_time 3600
+        </IfModule>
       </Directory>
       
       # Enable HTTP/2
       Protocols h2 http/1.1
-      
-      # Enable .htaccess files
-      AllowOverride All
-      
-      # Enable large file uploads
-      <IfModule mod_php7.c>
-        php_value upload_max_filesize 16G
-        php_value post_max_size 16G
-        php_value max_input_time 3600
-        php_value max_execution_time 3600
-      </IfModule>
       
       ErrorLog ${APACHE_LOG_DIR}/error.log
       CustomLog ${APACHE_LOG_DIR}/access.log combined

@@ -37,6 +37,16 @@ spec:
             - containerPort: 80
               name: http
           env:
+            # Auto-install configuration
+            - name: NEXTCLOUD_ADMIN_USER
+              value: "admin"
+            - name: NEXTCLOUD_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud-admin-creds
+                  key: password
+            - name: NEXTCLOUD_TRUSTED_DOMAINS
+              value: "nextcloud.home localhost"
             - name: POSTGRES_HOST
               value: postgres.data.svc.cluster.local
             - name: POSTGRES_DB
@@ -73,21 +83,18 @@ spec:
             - name: nextcloud-custom-config
               mountPath: /etc/apache2/sites-available/000-default.conf
               subPath: apache-config.conf
-            - name: nextcloud-s3-config
-              mountPath: /var/www/html/config/s3.config.php
-              subPath: custom.config.php
           startupProbe:
             httpGet:
               path: /status.php
               port: http
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             failureThreshold: 30
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /status.php
               port: http
-            initialDelaySeconds: 120
+            initialDelaySeconds: 180
             periodSeconds: 30
           readinessProbe:
             httpGet:
@@ -108,51 +115,58 @@ spec:
                       sleep 10
                     done
                     
-                    # Create script to enable S3 external storage
-                    cat > /tmp/enable_s3_storage.php << 'EOF'
-                    <?php
-                    require_once '/var/www/html/lib/base.php';
-                    
-                    // Wait for full initialization
-                    while (!\OC::$server->getSystemConfig()->getValue('installed', false)) {
-                      echo "Waiting for Nextcloud to fully initialize...\n";
-                      sleep(10);
-                    }
-                    
-                    echo "Nextcloud is fully initialized. Proceeding with app setup...\n";
-                    
-                    // Get necessary services
-                    $appManager = \OC::$server->getAppManager();
-                    
-                    // Enable external storage app
-                    if (!$appManager->isEnabledForUser('files_external')) {
-                      echo "Enabling external storage app...\n";
-                      $appManager->enableApp('files_external');
-                    }
-                    
-                    // Enable S3 compatibility apps
-                    if (!$appManager->isEnabledForUser('files_external_s3')) {
-                      echo "Enabling S3 compatibility app...\n";
-                      $appManager->enableApp('files_external_s3');
-                    }
-                    
-                    echo "App setup completed!\n";
-                    EOF
-                    
                     # Wait a bit more to ensure database is fully set up
                     sleep 30
                     
-                    # Execute the script
-                    php /tmp/enable_s3_storage.php
+                    # Create MinIO configuration
+                    cat > /var/www/html/config/s3.config.php << 'EOF'
+                    <?php
+                    $CONFIG = [
+                      'objectstore' => [
+                        'class' => '\\OC\\Files\\ObjectStore\\S3',
+                        'arguments' => [
+                          'bucket' => 'nextcloud',
+                          'autocreate' => true,
+                          'key' => 'admin',
+                          'secret' => 'minio123SecurePassword!@#',
+                          'hostname' => '192.168.68.64',
+                          'port' => 9000,
+                          'use_ssl' => false,
+                          'use_path_style' => true,
+                        ],
+                      ],
+                    ];
+                    EOF
+                    
+                    # Create Redis configuration
+                    cat > /var/www/html/config/redis.config.php << 'EOF'
+                    <?php
+                    $CONFIG = [
+                      'memcache.distributed' => '\\OC\\Memcache\\Redis',
+                      'memcache.local' => '\\OC\\Memcache\\APCu',
+                      'redis' => [
+                        'host' => 'redis.data.svc.cluster.local',
+                        'port' => 6379,
+                      ],
+                    ];
+                    EOF
+                    
+                    # Run occ maintenance:repair to apply configurations
+                    echo "Running maintenance:repair to apply configurations..."
+                    php /var/www/html/occ maintenance:repair
+                    
+                    # Enable required apps
+                    echo "Enabling required apps..."
+                    php /var/www/html/occ app:enable files_external
+                    php /var/www/html/occ app:enable files_external_s3
                     
                     echo "Nextcloud post-initialization complete"
           resources:
             requests:
-              cpu: 200m
-              memory: 256Mi
+              cpu: 100m
+              memory: 128Mi
             limits:
-              cpu: 1000m
-              memory: 1Gi
+              memory: 512Mi
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -163,6 +177,3 @@ spec:
         - name: nextcloud-custom-config
           configMap:
             name: nextcloud-apache-config
-        - name: nextcloud-s3-config
-          configMap:
-            name: nextcloud-configs
