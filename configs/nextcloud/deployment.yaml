@@ -69,6 +69,8 @@ spec:
       containers:
         - name: nextcloud
           image: nextcloud:apache
+          # Remove securityContext to allow running as root initially
+          # This allows Apache setup to complete properly
           ports:
             - containerPort: 80
               name: http
@@ -138,9 +140,6 @@ spec:
               port: http
             initialDelaySeconds: 60
             periodSeconds: 15
-          securityContext:
-            runAsUser: 33  # www-data
-            runAsGroup: 33  # www-data
           lifecycle:
             postStart:
               exec:
@@ -200,11 +199,10 @@ spec:
                     echo "NextCloud post-installation configuration complete!"
           resources:
             requests:
-              cpu: 200m
-              memory: 256Mi
+              cpu: 100m
+              memory: 128Mi
             limits:
-              cpu: 1000m
-              memory: 1Gi
+              memory: 512Mi
       volumes:
         - name: config
           persistentVolumeClaim:
