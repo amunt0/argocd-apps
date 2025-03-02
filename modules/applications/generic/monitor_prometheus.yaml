@@ -25,8 +25,41 @@ spec:
             limits:
               memory: 512Mi
           retention: 8h
+          service:
+            type: ClusterIP
+          # Add ingress configuration
+          ingress:
+            enabled: false
         alertmanager:
           enabled: false
+        # Add additional resources using the extraManifests feature
+        extraManifests:
+          - apiVersion: v1
+            kind: Service
+            metadata:
+              name: prometheus-server-lb
+              namespace: monitoring
+              annotations:
+                metallb.universe.tf/loadBalancerIPs: "192.168.71.14"    
+                external-dns.alpha.kubernetes.io/hostname: "prometheus.home"
+                external-dns.alpha.kubernetes.io/ingress-hostname-source: "service-annotation-only"
+              labels:
+                app: prometheus
+                component: server
+            spec:
+              selector:
+                app: prometheus
+                component: server
+              ports:
+                - port: 80
+                  targetPort: 9090
+                  protocol: TCP
+                  name: http
+                - port: 443
+                  targetPort: 9090
+                  protocol: TCP
+                  name: https
+              type: LoadBalancer
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
