@@ -26,8 +26,6 @@ spec:
             - --policy=upsert-only
             - --pihole-server=http://pihole.dns.svc.cluster.local
             - --log-level=debug
-          securityContext:
-            fsGroup: 65534
           envFrom:
           - secretRef:
               name: pihole-password       
