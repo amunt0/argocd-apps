@@ -1,0 +1,13 @@
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: media
+resources:
+  - qbittorrent-vpn.yaml
+  - sonarr.yaml
+  - radarr.yaml
+  - prowlarr.yaml
+  - pvc.yaml
+  - ingress.yaml
+  - secrets.yaml
+  - network-policy.yaml
