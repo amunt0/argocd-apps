@@ -34,7 +34,7 @@ spec:
                   name: nordvpn-credentials
                   key: NORDVPN_TOKEN
             - name: CONNECT
-              value: "Netherlands"  # Connect to Netherlands servers
+              value: "Romania"  # Connect to Netherlands servers
             - name: TECHNOLOGY
               value: "NordLynx"
             - name: NETWORK
