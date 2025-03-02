@@ -40,5 +40,5 @@ spec:
       protocol: TCP
       name: https
   type: LoadBalancer
-  loadBalancerIP: 192.168.71.13
+    #  loadBalancerIP: 192.168.71.13
     
