@@ -1,29 +1,99 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nextcloud-nginx-config
+  name: nextcloud-apache-config
   namespace: media
 data:
-  nginx.conf: |
-    server {
-      listen 80;
+  apache-config.conf: |
+    <VirtualHost *:80>
+      DocumentRoot /var/www/html/
       
-      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-      client_max_body_size 512M;
-      fastcgi_buffers 64 4K;
+      <Directory /var/www/html/>
+        Options FollowSymlinks MultiViews
+        AllowOverride All
+        Require all granted
+        
+        <IfModule mod_dav.c>
+          Dav off
+        </IfModule>
+        
+        SetEnv HOME /var/www/html
+        SetEnv HTTP_HOME /var/www/html
+      </Directory>
       
-      location / {
-        root /var/www/html;
-        index index.php index.html;
-        try_files $uri $uri/ /index.php$is_args$args;
-      }
+      # Enable HTTP/2
+      Protocols h2 http/1.1
       
-      location ~ \.php$ {
-        root /var/www/html;
-        fastcgi_pass 127.0.0.1:9000;
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        include fastcgi_params;
-        fastcgi_read_timeout 300;
-      }
-    }
+      # Enable .htaccess files
+      AllowOverride All
+      
+      # Enable large file uploads
+      <IfModule mod_php7.c>
+        php_value upload_max_filesize 16G
+        php_value post_max_size 16G
+        php_value max_input_time 3600
+        php_value max_execution_time 3600
+      </IfModule>
+      
+      ErrorLog ${APACHE_LOG_DIR}/error.log
+      CustomLog ${APACHE_LOG_DIR}/access.log combined
+    </VirtualHost>
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nextcloud-configs
+  namespace: media
+data:
+  # This can be used to add custom PHP settings or NextCloud configurations
+  custom.config.php: |
+    <?php
+    $CONFIG = array (
+      'trusted_domains' => array(
+        'nextcloud.home',
+        'localhost',
+      ),
+      'trusted_proxies' => array(
+        '10.0.0.0/8',
+        '172.16.0.0/12',
+        '192.168.0.0/16',
+      ),
+      'overwriteprotocol' => 'https',
+      'overwrite.cli.url' => 'https://nextcloud.home',
+      'default_phone_region' => 'US',
+      'filesystem_check_changes' => 1,
+      'memcache.local' => '\\OC\\Memcache\\APCu',
+      'memcache.distributed' => '\\OC\\Memcache\\Redis',
+      'redis' => array(
+        'host' => 'redis.data.svc.cluster.local',
+        'port' => 6379,
+      ),
+      # S3 configuration for primary storage
+      'objectstore' => array(
+        'class' => '\\OC\\Files\\ObjectStore\\S3',
+        'arguments' => array(
+          'bucket' => 'nextcloud',
+          'autocreate' => true,
+          'key' => 'admin',
+          'secret' => 'minio123SecurePassword!@#',
+          'hostname' => '192.168.68.64',
+          'port' => 9000,
+          'use_ssl' => false,
+          'use_path_style' => true,
+        ),
+      ),
+      # Enable external storage app automatically
+      'apps_paths' => array(
+        array(
+          'path' => '/var/www/html/apps',
+          'url' => '/apps',
+          'writable' => false,
+        ),
+        array(
+          'path' => '/var/www/html/custom_apps',
+          'url' => '/custom_apps',
+          'writable' => true,
+        ),
+      ),
+    );

@@ -1,4 +1,3 @@
-
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -9,12 +8,15 @@ metadata:
     kubernetes.io/ingress.class: "traefik"
     traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
     traefik.ingress.kubernetes.io/router.tls: "true"
-    # Headers for Nextcloud security
-    traefik.ingress.kubernetes.io/router.middlewares: media-nextcloud-headers@kubernetescrd
-    # ExternalDNS annotations
     external-dns.alpha.kubernetes.io/enabled: "true"
     external-dns.alpha.kubernetes.io/hostname: "nextcloud.home"
     external-dns.alpha.kubernetes.io/ttl: "60"
+    # NextCloud specific annotations
+    traefik.ingress.kubernetes.io/preserve-host: "true"
+    # Increase timeouts for large file uploads
+    traefik.ingress.kubernetes.io/request-timeout: "300s"
+    # Add required headers
+    traefik.ingress.kubernetes.io/headers-middleware: "nextcloud-security-headers"
 spec:
   tls:
     - hosts:
@@ -28,30 +30,21 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: nextcloud-server-lb
+                name: nextcloud
                 port:
-                  number: 443
----
+                  number: 80
+---                    
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
-  name: nextcloud-headers
+  name: nextcloud-security-headers
   namespace: media
 spec:
   headers:
-    frameDeny: true
-    browserXssFilter: true
+    customRequestHeaders:
+      X-Forwarded-Proto: "https"
     customResponseHeaders:
-      Strict-Transport-Security: "15552000"
-      X-Frame-Options: SAMEORIGIN
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: nextcloud-redirects
-  namespace: media
-spec:
-  redirectRegex:
-    regex: https://(.*)/.well-known/(card|cal)dav
-    replacement: https://$1/remote.php/dav/
-
+      X-Content-Type-Options: "nosniff"
+      X-XSS-Protection: "1; mode=block"
+      Referrer-Policy: "no-referrer"
+      X-Frame-Options: "SAMEORIGIN"                    

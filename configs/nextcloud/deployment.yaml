@@ -44,12 +44,12 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: postgres-creds
+                  name: nextcloud-db-creds
                   key: username
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-creds
+                  name: nextcloud-db-creds
                   key: password
             - name: PHP_MEMORY_LIMIT
               value: "512M"
@@ -63,11 +63,38 @@ spec:
               value: "nextcloud.home"
             - name: OVERWRITEPROTOCOL
               value: "https"
+            - name: REDIS_HOST
+              value: "redis.data.svc.cluster.local"
           volumeMounts:
             - name: config
               mountPath: /var/www/html/config
             - name: nextcloud-data
               mountPath: /var/www/html/data
+            - name: nextcloud-custom-config
+              mountPath: /etc/apache2/sites-available/000-default.conf
+              subPath: apache-config.conf
+            - name: nextcloud-s3-config
+              mountPath: /var/www/html/config/s3.config.php
+              subPath: custom.config.php
+          startupProbe:
+            httpGet:
+              path: /status.php
+              port: http
+            initialDelaySeconds: 30
+            failureThreshold: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /status.php
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /status.php
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 15
           lifecycle:
             postStart:
               exec:
@@ -81,8 +108,8 @@ spec:
                       sleep 10
                     done
                     
-                    # Create script to mount external storage
-                    cat > /tmp/mount_external_storage.php << 'EOF'
+                    # Create script to enable S3 external storage
+                    cat > /tmp/enable_s3_storage.php << 'EOF'
                     <?php
                     require_once '/var/www/html/lib/base.php';
                     
@@ -92,33 +119,40 @@ spec:
                       sleep(10);
                     }
                     
-                    echo "Nextcloud is fully initialized. Proceeding with external storage setup...\n";
+                    echo "Nextcloud is fully initialized. Proceeding with app setup...\n";
                     
                     // Get necessary services
                     $appManager = \OC::$server->getAppManager();
                     
-                    // Enable external storage app if not already enabled
+                    // Enable external storage app
                     if (!$appManager->isEnabledForUser('files_external')) {
                       echo "Enabling external storage app...\n";
                       $appManager->enableApp('files_external');
                     }
                     
-                    echo "External storage setup completed!\n";
+                    // Enable S3 compatibility apps
+                    if (!$appManager->isEnabledForUser('files_external_s3')) {
+                      echo "Enabling S3 compatibility app...\n";
+                      $appManager->enableApp('files_external_s3');
+                    }
+                    
+                    echo "App setup completed!\n";
                     EOF
                     
                     # Wait a bit more to ensure database is fully set up
                     sleep 30
                     
                     # Execute the script
-                    php /tmp/mount_external_storage.php
+                    php /tmp/enable_s3_storage.php
                     
                     echo "Nextcloud post-initialization complete"
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 200m
+              memory: 256Mi
             limits:
-              memory: 512Mi
+              cpu: 1000m
+              memory: 1Gi
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -126,3 +160,9 @@ spec:
         - name: nextcloud-data
           persistentVolumeClaim:
             claimName: nextcloud-data-pvc
+        - name: nextcloud-custom-config
+          configMap:
+            name: nextcloud-apache-config
+        - name: nextcloud-s3-config
+          configMap:
+            name: nextcloud-configs

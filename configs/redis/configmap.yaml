@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: data
+data:
+  redis.conf: |
+    # Redis configuration file for NextCloud
+    
+    # General settings
+    daemonize no
+    supervised no
+    
+    # Persistence settings
+    appendonly yes
+    appendfsync everysec
+    
+    # Snapshotting
+    save 900 1
+    save 300 10
+    save 60 10000
+    
+    # Memory management
+    maxmemory 1536mb
+    maxmemory-policy allkeys-lru
+    
+    # Data directory - must match the mount point
+    dir /data
+    
+    # Logging
+    loglevel notice
