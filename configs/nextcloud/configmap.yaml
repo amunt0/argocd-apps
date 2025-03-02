@@ -66,20 +66,6 @@ data:
         'host' => 'redis.data.svc.cluster.local',
         'port' => 6379,
       ),
-      # S3 configuration for primary storage
-      'objectstore' => array(
-        'class' => '\\OC\\Files\\ObjectStore\\S3',
-        'arguments' => array(
-          'bucket' => 'nextcloud',
-          'autocreate' => true,
-          'key' => 'admin',
-          'secret' => 'minio123SecurePassword!@#',
-          'hostname' => '192.168.68.64',
-          'port' => 9000,
-          'use_ssl' => false,
-          'use_path_style' => true,
-        ),
-      ),
       # Enable external storage app automatically
       'apps_paths' => array(
         array(
