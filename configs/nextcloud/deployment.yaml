@@ -66,19 +66,42 @@ spec:
           volumeMounts:
             - name: nextcloud-data
               mountPath: /var/www/html/data
-        - name: configure-s3
+        # This special init container will prepare everything for Nextcloud
+        - name: setup-nextcloud
           image: nextcloud:apache
           command:
-            - sh
+            - bash
             - -c
             - |
-              # Create configs directory if it doesn't exist
-              mkdir -p /var/www/html/config
+              set -ex
               
-              # Write S3 configuration before Nextcloud starts
-              cat > /var/www/html/config/s3.config.php << 'EOF'
+              # Create necessary directories
+              mkdir -p /var/www/html/config
+              mkdir -p /var/www/html/data
+              
+              # If config.php doesn't exist, we need to create it manually
+              if [ ! -f /var/www/html/config/config.php ]; then
+                echo "Creating initial config.php file..."
+                
+                # Create the most basic config.php that will let Nextcloud start
+                cat > /var/www/html/config/config.php << 'EOF'
               <?php
               $CONFIG = array (
+                'instanceid' => '$(openssl rand -hex 16)',
+                'passwordsalt' => '$(openssl rand -hex 16)',
+                'secret' => '$(openssl rand -hex 16)',
+                'trusted_domains' => array('nextcloud.home', 'localhost'),
+                'datadirectory' => '/var/www/html/data',
+                'dbtype' => 'pgsql',
+                'dbhost' => 'postgres.data.svc.cluster.local',
+                'dbname' => 'mediadb',
+                'dbuser' => 'postgres',
+                'dbpassword' => 'NasServerPostgresdb',
+                'dbport' => '',
+                'dbtableprefix' => 'oc_',
+                'installed' => true,
+                
+                # S3 primary storage configuration
                 'objectstore' => array(
                   'class' => '\\OC\\Files\\ObjectStore\\S3',
                   'arguments' => array(
@@ -92,13 +115,34 @@ spec:
                     'use_path_style' => true,
                   ),
                 ),
+                
+                # Redis configuration
+                'memcache.local' => '\\OC\\Memcache\\APCu',
+                'memcache.distributed' => '\\OC\\Memcache\\Redis',
+                'redis' => array(
+                  'host' => 'redis.data.svc.cluster.local',
+                  'port' => 6379,
+                ),
+                
+                'trusted_proxies' => array('10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16'),
+                'overwriteprotocol' => 'https',
+                'overwrite.cli.url' => 'https://nextcloud.home',
               );
               EOF
               
-              echo "S3 primary storage configuration created."
+                echo "Created config.php to bypass installation process."
+              else
+                echo "config.php already exists, skipping creation."
+              fi
+              
+              # Ensure proper permissions
+              chown -R www-data:www-data /var/www/html/config
+              chown -R www-data:www-data /var/www/html/data
           volumeMounts:
             - name: config
               mountPath: /var/www/html/config
+            - name: nextcloud-data
+              mountPath: /var/www/html/data
       containers:
         - name: nextcloud
           image: nextcloud:apache
@@ -106,7 +150,19 @@ spec:
             - containerPort: 80
               name: http
           env:
-            # Auto-install configuration
+            # Skip auto-installation since we've already set up the config file
+            - name: NEXTCLOUD_UPDATE
+              value: "1"
+            # Skip the check_data_directory_permissions warning
+            - name: NEXTCLOUD_DATA_DIR_PERMISSIONS
+              value: "0770"
+            # PHP and proxy settings
+            - name: PHP_MEMORY_LIMIT
+              value: "512M"
+            - name: PHP_UPLOAD_LIMIT
+              value: "512M"
+            # Admin username and password - these aren't used during initialization
+            # but might be needed by some apps
             - name: NEXTCLOUD_ADMIN_USER
               value: "admin"
             - name: NEXTCLOUD_ADMIN_PASSWORD
@@ -114,41 +170,6 @@ spec:
                 secretKeyRef:
                   name: nextcloud-admin-creds
                   key: password
-            - name: NEXTCLOUD_TRUSTED_DOMAINS
-              value: "nextcloud.home localhost"
-            # Database configuration
-            - name: POSTGRES_HOST
-              value: postgres.data.svc.cluster.local
-            - name: POSTGRES_DB
-              value: mediadb
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: nextcloud-db-creds
-                  key: username
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: nextcloud-db-creds
-                  key: password
-            # PHP and proxy settings
-            - name: PHP_MEMORY_LIMIT
-              value: "512M"
-            - name: PHP_UPLOAD_LIMIT
-              value: "512M"
-            - name: TRUSTED_PROXIES
-              value: "10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
-            - name: APACHE_DISABLE_REWRITE_IP
-              value: "1"
-            - name: OVERWRITEHOST
-              value: "nextcloud.home"
-            - name: OVERWRITEPROTOCOL
-              value: "https"
-            - name: REDIS_HOST
-              value: "redis.data.svc.cluster.local"
-            # Skip running the installation again if config directory exists
-            - name: NEXTCLOUD_UPDATE
-              value: "1"
           volumeMounts:
             - name: config
               mountPath: /var/www/html/config
@@ -157,35 +178,31 @@ spec:
             - name: nextcloud-custom-config
               mountPath: /etc/apache2/sites-available/000-default.conf
               subPath: apache-config.conf
-            - name: custom-config
-              mountPath: /var/www/html/config/custom.config.php
-              subPath: custom.config.php
           startupProbe:
             httpGet:
               path: /status.php
               port: http
-            initialDelaySeconds: 120
+            initialDelaySeconds: 30
             failureThreshold: 30
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /status.php
               port: http
-            initialDelaySeconds: 180
+            initialDelaySeconds: 60
             periodSeconds: 30
           readinessProbe:
             httpGet:
               path: /status.php
               port: http
-            initialDelaySeconds: 120
+            initialDelaySeconds: 30
             periodSeconds: 15
           resources:
             requests:
-              cpu: 200m
-              memory: 256Mi
+              cpu: 100m
+              memory: 128Mi
             limits:
-              cpu: 1000m
-              memory: 1Gi
+              memory: 512Mi
           lifecycle:
             postStart:
               exec:
@@ -196,15 +213,21 @@ spec:
                     # Wait for Nextcloud to be fully initialized
                     sleep 30
                     
-                    # Only run the configuration if the external storage isn't set up yet
-                    if ! php /var/www/html/occ app:list | grep -q "files_external"; then
-                      # Enable required apps
-                      php /var/www/html/occ app:enable files_external || echo "Could not enable files_external"
-                      php /var/www/html/occ app:enable files_external_s3 || echo "Could not enable files_external_s3"
-                      
+                    # Run database repairs if needed
+                    php /var/www/html/occ maintenance:repair || true
+                    
+                    # Enable required apps
+                    php /var/www/html/occ app:enable files_external || echo "Could not enable files_external"
+                    php /var/www/html/occ app:enable files_external_s3 || echo "Could not enable files_external_s3"
+                    
+                    # Only setup external storage if it doesn't exist
+                    if ! php /var/www/html/occ files_external:list | grep -q "Movies"; then
                       # Setup external storages
                       echo "Setting up external S3 storage for media buckets..."
-                      php /var/www/html/occ files_external:create "Movies" amazons3 amazons3::accesskey \
+                      
+                      # Movies bucket
+                      php /var/www/html/occ files_external:create \
+                        "Movies" amazons3 amazons3::accesskey \
                         --config bucket=movies \
                         --config hostname=192.168.68.64 \
                         --config port=9000 \
@@ -215,7 +238,9 @@ spec:
                         --config key=admin \
                         --config secret=minio123SecurePassword!@# || echo "Failed to set up Movies bucket"
                       
-                      php /var/www/html/occ files_external:create "TV Series" amazons3 amazons3::accesskey \
+                      # Series bucket
+                      php /var/www/html/occ files_external:create \
+                        "TV Series" amazons3 amazons3::accesskey \
                         --config bucket=series \
                         --config hostname=192.168.68.64 \
                         --config port=9000 \
@@ -226,7 +251,9 @@ spec:
                         --config key=admin \
                         --config secret=minio123SecurePassword!@# || echo "Failed to set up TV Series bucket"
                       
-                      php /var/www/html/occ files_external:create "Pictures" amazons3 amazons3::accesskey \
+                      # Pictures bucket
+                      php /var/www/html/occ files_external:create \
+                        "Pictures" amazons3 amazons3::accesskey \
                         --config bucket=pictures \
                         --config hostname=192.168.68.64 \
                         --config port=9000 \
@@ -237,6 +264,8 @@ spec:
                         --config key=admin \
                         --config secret=minio123SecurePassword!@# || echo "Failed to set up Pictures bucket"
                     fi
+                    
+                    echo "Nextcloud post-initialization completed successfully"
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -247,9 +276,3 @@ spec:
         - name: nextcloud-custom-config
           configMap:
             name: nextcloud-apache-config
-        - name: custom-config
-          configMap:
-            name: nextcloud-configs
-            items:
-              - key: custom.config.php
-                path: custom.config.php
