@@ -17,34 +17,32 @@ spec:
       labels:
         app: qbittorrent-vpn
     spec:
-      # Using a single container approach with VPN sidecar
       containers:
-        - name: qbittorrent-nordvpn
-          image: ghcr.io/wfg/qbittorrent-nordvpn:latest
+        - name: nordvpn
+          image: ghcr.io/bubuntux/nordvpn:v3.12.2
           securityContext:
             capabilities:
               add:
                 - NET_ADMIN
-                - SYS_MODULE
+                - NET_RAW
           env:
-            # NordVPN settings
-            - name: NORDVPN_TOKEN
+            - name: TOKEN
               valueFrom:
                 secretKeyRef:
                   name: nordvpn-credentials
                   key: NORDVPN_TOKEN
-            - name: SERVER
+            - name: CONNECT
               value: "nl"  # Netherlands servers
-            - name: PROTOCOL
-              value: "nordlynx"
-            - name: CATEGORY
-              value: "p2p"
-            - name: FIREWALL
-              value: "true"
-            - name: LAN_NETWORK
+            - name: TECHNOLOGY
+              value: "NordLynx"
+            - name: NETWORK
               value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
-            
-            # qBittorrent settings
+          volumeMounts:
+            - name: dev-tun
+              mountPath: /dev/net/tun
+        - name: qbittorrent
+          image: linuxserver/qbittorrent:latest
+          env:
             - name: PUID
               value: "1000"
             - name: PGID
@@ -67,8 +65,6 @@ spec:
               mountPath: /mnt/movies
             - name: series
               mountPath: /mnt/tv
-            - name: dev-tun
-              mountPath: /dev/net/tun
           resources:
             requests:
               cpu: 200m
@@ -116,3 +112,4 @@ spec:
       targetPort: 8080
   selector:
     app: qbittorrent-vpn
+
