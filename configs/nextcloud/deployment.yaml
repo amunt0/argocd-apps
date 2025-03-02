@@ -18,6 +18,39 @@ spec:
         app: nextcloud
     spec:
       initContainers:
+        - name: wait-for-db
+          image: postgres:13-alpine
+          command:
+            - sh
+            - -c
+            - |
+              echo "Checking if PostgreSQL database exists..."
+              until PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -c '\l' | grep -q "$POSTGRES_DB"; do
+                echo "Database $POSTGRES_DB does not exist yet. Attempting to create it..."
+                PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "CREATE DATABASE $POSTGRES_DB;"
+                if [ $? -eq 0 ]; then
+                  echo "Database $POSTGRES_DB created successfully!"
+                  break
+                fi
+                echo "Could not create database, waiting for database to be available..."
+                sleep 5
+              done
+              echo "Database $POSTGRES_DB exists! Proceeding with NextCloud deployment."
+          env:
+            - name: POSTGRES_HOST
+              value: postgres.data.svc.cluster.local
+            - name: POSTGRES_DB
+              value: mediadb
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud-db-creds
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nextcloud-db-creds
+                  key: password
         - name: init-data-dirs
           image: alpine:latest
           command:
@@ -26,7 +59,7 @@ spec:
             - |
               mkdir -p /var/www/html/data/external
               chmod 770 /var/www/html/data/external
-              echo "Initialization complete"
+              echo "Data directory initialization complete"
           volumeMounts:
             - name: nextcloud-data
               mountPath: /var/www/html/data
