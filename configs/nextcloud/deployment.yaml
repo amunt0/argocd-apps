@@ -69,8 +69,6 @@ spec:
       containers:
         - name: nextcloud
           image: nextcloud:apache
-          # Remove securityContext to allow running as root initially
-          # This allows Apache setup to complete properly
           ports:
             - containerPort: 80
               name: http
@@ -85,6 +83,7 @@ spec:
                   key: password
             - name: NEXTCLOUD_TRUSTED_DOMAINS
               value: "nextcloud.home localhost"
+            # Database configuration
             - name: POSTGRES_HOST
               value: postgres.data.svc.cluster.local
             - name: POSTGRES_DB
@@ -99,6 +98,7 @@ spec:
                 secretKeyRef:
                   name: nextcloud-db-creds
                   key: password
+            # PHP and proxy settings
             - name: PHP_MEMORY_LIMIT
               value: "512M"
             - name: PHP_UPLOAD_LIMIT
@@ -125,7 +125,7 @@ spec:
             httpGet:
               path: /status.php
               port: http
-            initialDelaySeconds: 60
+            initialDelaySeconds: 120
             failureThreshold: 30
             periodSeconds: 10
           livenessProbe:
@@ -138,71 +138,15 @@ spec:
             httpGet:
               path: /status.php
               port: http
-            initialDelaySeconds: 60
+            initialDelaySeconds: 120
             periodSeconds: 15
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                  - /bin/sh
-                  - -c
-                  - |
-                    # Wait for Nextcloud to be installed
-                    while [ ! -f /var/www/html/config/config.php ]; do
-                      echo "Waiting for Nextcloud installation to complete..."
-                      sleep 10
-                    done
-                    
-                    echo "Nextcloud has been installed. Now configuring..."
-                    
-                    # Wait a bit to ensure everything is ready
-                    sleep 20
-                    
-                    # Fix permissions again to be sure
-                    chmod 0770 /var/www/html/data
-                    
-                    # Now that NextCloud is installed, configure S3 storage
-                    cat >> /var/www/html/config/config.php << 'EOF'
-                    
-                    // S3 configuration
-                    $CONFIG['objectstore'] = array(
-                      'class' => '\\OC\\Files\\ObjectStore\\S3',
-                      'arguments' => array(
-                        'bucket' => 'nextcloud',
-                        'autocreate' => true,
-                        'key' => 'admin',
-                        'secret' => 'minio123SecurePassword!@#',
-                        'hostname' => '192.168.68.64',
-                        'port' => 9000,
-                        'use_ssl' => false,
-                        'use_path_style' => true,
-                      ),
-                    );
-                    
-                    // Redis configuration
-                    $CONFIG['memcache.distributed'] = '\\OC\\Memcache\\Redis';
-                    $CONFIG['memcache.local'] = '\\OC\\Memcache\\APCu';
-                    $CONFIG['redis'] = array(
-                      'host' => 'redis.data.svc.cluster.local',
-                      'port' => 6379,
-                    );
-                    EOF
-                    
-                    echo "Configuration files added. Repairing NextCloud installation..."
-                    php /var/www/html/occ maintenance:repair --no-interaction
-                    
-                    # The apps can only be enabled after the S3 configuration is applied
-                    echo "Enabling apps..."
-                    php /var/www/html/occ app:enable files_external --no-interaction || echo "Could not enable files_external"
-                    php /var/www/html/occ app:enable files_external_s3 --no-interaction || echo "Could not enable files_external_s3"
-                    
-                    echo "NextCloud post-installation configuration complete!"
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 200m
+              memory: 256Mi
             limits:
-              memory: 512Mi
+              cpu: 1000m
+              memory: 1Gi
       volumes:
         - name: config
           persistentVolumeClaim:
