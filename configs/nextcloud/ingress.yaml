@@ -43,10 +43,29 @@ metadata:
 spec:
   headers:
     customRequestHeaders:
-      X-Forwarded-Proto: "https"
+      X-Forwarded-Proto: "http"
     customResponseHeaders:
       X-Content-Type-Options: "nosniff"
       X-XSS-Protection: "1; mode=block"
       Referrer-Policy: "no-referrer"
       X-Frame-Options: "SAMEORIGIN"
-        #      Strict-Transport-Security: "max-age=15552000; includeSubDomains"
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nextcloud-ip-access
+  namespace: media
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`192.168.71.13`)
+      kind: Rule
+      services:
+        - name: nextcloud
+          port: 80
+      middlewares:
+        - name: nextcloud-ip-access
+          namespace: media
+
