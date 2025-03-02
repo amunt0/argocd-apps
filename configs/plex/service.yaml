@@ -9,12 +9,9 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-    - port: 80
+    - port: 32400
       targetPort: 32400
-      name: http
-    - port: 443
-      targetPort: 32400
-      name: https
+      name: web
     - port: 1900
       targetPort: 1900
       protocol: UDP
@@ -63,4 +60,3 @@ spec:
       name: gdm3
   selector:
     app: plex
-

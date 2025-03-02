@@ -79,6 +79,89 @@ spec:
         - name: movies
           hostPath:
             path: /mnt/minio/movies
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plex
+  namespace: media
+spec:
+  selector:
+    matchLabels:
+      app: plex
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: plex
+    spec:
+      containers:
+        - name: plex
+          image: plexinc/pms-docker:latest
+          ports:
+            - containerPort: 32400
+              name: web
+            - containerPort: 1900
+              protocol: UDP
+              name: dlna-udp
+            - containerPort: 3005
+              name: gdm1
+            - containerPort: 5353
+              protocol: UDP
+              name: gdm2
+            - containerPort: 8324
+              name: gdm3
+          env:
+            - name: TZ
+              value: "Etc/UTC"
+            - name: PLEX_CLAIM
+              valueFrom:
+                secretKeyRef:
+                  name: plex-claim
+                  key: token
+                  optional: true
+            - name: ADVERTISE_IP
+              value: "http://192.168.71.11:32400/" # Changed to use IP directly with the node port
+            - name: ALLOWED_NETWORKS
+              value: "192.168.0.0/16" # Allow your local network
+            - name: PLEX_PREFERENCE_1
+              value: "TranscoderQuality=2"
+            - name: PLEX_PREFERENCE_2
+              value: "TranscoderH264BackgroundPreset=veryfast"
+            - name: PLEX_PREFERENCE_3
+              value: "TranscoderDefaultThrottleBuffer=60"
+            - name: PLEX_PREFERENCE_4
+              value: "SchedulerLowPriorityCpuThreshold=90"                
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: transcode
+              mountPath: /transcode
+            # Mount MinIO buckets directly from host
+            - name: movies
+              mountPath: /data/movies
+              readOnly: true
+            - name: series
+              mountPath: /data/series
+              readOnly: true
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: plex-config-pvc
+        - name: transcode
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
+        # Host path volumes pointing to mounted MinIO buckets
+        - name: movies
+          hostPath:
+            path: /mnt/minio/movies
             type: Directory
         - name: series
           hostPath:
