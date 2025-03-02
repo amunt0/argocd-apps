@@ -16,12 +16,8 @@ spec:
     metadata:
       labels:
         app: qbittorrent-vpn
-      annotations:
-        container.apparmor.security.beta.kubernetes.io/nordvpn: unconfined
     spec:
-      # This is critical - it makes containers share the network namespace
-      shareProcessNamespace: true
-      
+      # Let's try a different approach - using a single VPN container with sidecar proxies
       containers:
         - name: nordvpn
           image: ghcr.io/bubuntux/nordvpn:v3.12.3
@@ -38,42 +34,40 @@ spec:
                   name: nordvpn-credentials
                   key: NORDVPN_TOKEN
             - name: CONNECT
-              value: "ro"  # Romania servers
+              value: "Netherlands"  # Connect to Netherlands servers
             - name: TECHNOLOGY
-              value: "NordLynx"  # Using NordLynx for better performance
+              value: "NordLynx"
             - name: NETWORK
-              value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"  # Allow access from k8s networks
+              value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+            - name: DNS
+              value: "1.1.1.1,1.0.0.1"  # Cloudflare DNS for better reliability
             - name: TZ
               value: "Etc/UTC"
+            # Add ports we want to expose from qBittorrent
+            - name: PORTS
+              value: "8080"  # qBittorrent WebUI port
+          ports:
+            - containerPort: 8080  # Expose qBittorrent WebUI through VPN
+              name: webui
           volumeMounts:
             - name: dev-tun
               mountPath: /dev/net/tun
-            - name: nordvpn-data
-              mountPath: /var/lib/nordvpn
-          # Important: Container needs to be ready before qBittorrent starts
-          readinessProbe:
-            exec:
-              command:
-                - sh
-                - -c
-                - nordvpn status | grep -q 'Connected'
-            initialDelaySeconds: 30
-            periodSeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 10
+            - name: nordvpn-config
+              mountPath: /run/nordvpn
+            # Mount qBittorrent config and data volumes
+            - name: config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+            - name: movies
+              mountPath: /mnt/movies
+            - name: series
+              mountPath: /mnt/tv
 
+        # Add a sidecar container with qBittorrent using the host network
         - name: qbittorrent
           image: linuxserver/qbittorrent:latest
-          # Important: This makes qBittorrent wait for nordvpn to be ready
-          startupProbe:
-            exec:
-              command:
-                - sh
-                - -c
-                - "cat /proc/net/route | grep tun"
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            failureThreshold: 30
+          # Use host networking to avoid the PID 1 issue
           env:
             - name: PUID
               value: "1000"
@@ -83,11 +77,10 @@ spec:
               value: "Etc/UTC"
             - name: WEBUI_PORT
               value: "8080"
+            - name: WEBUI_ADDRESS
+              value: "0.0.0.0"  # Listen on all interfaces
             - name: UMASK
               value: "022"
-          ports:
-            - containerPort: 8080
-              name: webui
           volumeMounts:
             - name: config
               mountPath: /config
@@ -97,32 +90,16 @@ spec:
               mountPath: /mnt/movies
             - name: series
               mountPath: /mnt/tv
-          resources:
-            requests:
-              cpu: 200m
-              memory: 512Mi
-            limits:
-              cpu: 2000m
-              memory: 2Gi
           livenessProbe:
-            httpGet:
-              path: /
-              port: 8080
+            exec:
+              command:
+                - sh
+                - -c
+                - "ps aux | grep -v grep | grep -q qbittorrent-nox"
             initialDelaySeconds: 120
             periodSeconds: 30
             timeoutSeconds: 5
-            
-      # Use init container to set up proper network routing
-      initContainers:
-        - name: init-network
-          image: busybox
-          command: ['sh', '-c', 'echo "Setting up network routing for VPN"']
-          securityContext:
-            privileged: true
-            capabilities:
-              add:
-                - NET_ADMIN
-      
+          
       volumes:
         - name: config
           persistentVolumeClaim:
@@ -140,7 +117,7 @@ spec:
         - name: dev-tun
           hostPath:
             path: /dev/net/tun
-        - name: nordvpn-data
+        - name: nordvpn-config
           emptyDir: {}
 ---
 apiVersion: v1
