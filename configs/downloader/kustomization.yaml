@@ -9,5 +9,4 @@ resources:
   - prowlarr.yaml
   - pvc.yaml
   - ingress.yaml
-  - secrets.yaml
   - network-policy.yaml
