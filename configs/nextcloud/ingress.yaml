@@ -11,12 +11,13 @@ metadata:
     external-dns.alpha.kubernetes.io/enabled: "true"
     external-dns.alpha.kubernetes.io/hostname: "nextcloud.home"
     external-dns.alpha.kubernetes.io/ttl: "60"
-    # NextCloud specific annotations
+    # Add these Traefik specific annotations
     traefik.ingress.kubernetes.io/preserve-host: "true"
-    # Increase timeouts for large file uploads
+    traefik.ingress.kubernetes.io/pass-client-headers: "true"
+    # Nextcloud-specific settings
     traefik.ingress.kubernetes.io/request-timeout: "300s"
-    # Add required headers
-    traefik.ingress.kubernetes.io/headers-middleware: "nextcloud-security-headers"
+    # Reference to the security headers middleware
+    traefik.ingress.kubernetes.io/middlewares: "media-nextcloud-security-headers@kubernetescrd"
 spec:
   tls:
     - hosts:
@@ -33,7 +34,7 @@ spec:
                 name: nextcloud
                 port:
                   number: 80
----                    
+---
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
@@ -47,4 +48,5 @@ spec:
       X-Content-Type-Options: "nosniff"
       X-XSS-Protection: "1; mode=block"
       Referrer-Policy: "no-referrer"
-      X-Frame-Options: "SAMEORIGIN"                    
+      X-Frame-Options: "SAMEORIGIN"
+      Strict-Transport-Security: "max-age=15552000; includeSubDomains"         
