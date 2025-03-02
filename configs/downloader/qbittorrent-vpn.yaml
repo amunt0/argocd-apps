@@ -29,10 +29,7 @@ spec:
                 - NET_RAW
           env:
             - name: TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: nordvpn-credentials
-                  key: NORDVPN_TOKEN
+              value: "e9f2abfa27d9b2fdfd7cd8d4a798c97c27d6996f2c24f54d57cc4f3af9d48fe6"
             - name: CONNECT
               value: "Romania"  # Connect to Netherlands servers
             - name: TECHNOLOGY
