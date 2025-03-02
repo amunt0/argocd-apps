@@ -8,4 +8,3 @@ resources:
   - prowlarr.yaml
   - pvc.yaml
   - ingress.yaml
-  - network-policy.yaml
