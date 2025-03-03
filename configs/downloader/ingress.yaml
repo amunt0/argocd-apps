@@ -13,6 +13,9 @@ metadata:
     external-dns.alpha.kubernetes.io/ttl: "60"
     traefik.ingress.kubernetes.io/preserve-host: "true"
     traefik.ingress.kubernetes.io/pass-client-headers: "true"
+    # Add retry configuration
+    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+    traefik.ingress.kubernetes.io/retry.attempts: "3"
 spec:
   tls:
     - hosts:
@@ -45,6 +48,9 @@ metadata:
     external-dns.alpha.kubernetes.io/ttl: "60"
     traefik.ingress.kubernetes.io/preserve-host: "true"
     traefik.ingress.kubernetes.io/pass-client-headers: "true"
+    # Add retry configuration
+    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+    traefik.ingress.kubernetes.io/retry.attempts: "3"
 spec:
   tls:
     - hosts:
@@ -77,6 +83,9 @@ metadata:
     external-dns.alpha.kubernetes.io/ttl: "60"
     traefik.ingress.kubernetes.io/preserve-host: "true"
     traefik.ingress.kubernetes.io/pass-client-headers: "true"
+    # Add retry configuration
+    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+    traefik.ingress.kubernetes.io/retry.attempts: "3"
 spec:
   tls:
     - hosts:
