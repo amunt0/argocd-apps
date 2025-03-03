@@ -1,3 +1,4 @@
+# Ingress Resources
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -13,9 +14,7 @@ metadata:
     external-dns.alpha.kubernetes.io/ttl: "60"
     traefik.ingress.kubernetes.io/preserve-host: "true"
     traefik.ingress.kubernetes.io/pass-client-headers: "true"
-    # Add retry configuration
-    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
-    traefik.ingress.kubernetes.io/retry.attempts: "3"
+    traefik.ingress.kubernetes.io/request-timeout: "300s"
 spec:
   tls:
     - hosts:
@@ -48,9 +47,7 @@ metadata:
     external-dns.alpha.kubernetes.io/ttl: "60"
     traefik.ingress.kubernetes.io/preserve-host: "true"
     traefik.ingress.kubernetes.io/pass-client-headers: "true"
-    # Add retry configuration
-    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
-    traefik.ingress.kubernetes.io/retry.attempts: "3"
+    traefik.ingress.kubernetes.io/request-timeout: "300s"
 spec:
   tls:
     - hosts:
@@ -83,9 +80,7 @@ metadata:
     external-dns.alpha.kubernetes.io/ttl: "60"
     traefik.ingress.kubernetes.io/preserve-host: "true"
     traefik.ingress.kubernetes.io/pass-client-headers: "true"
-    # Add retry configuration
-    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
-    traefik.ingress.kubernetes.io/retry.attempts: "3"
+    traefik.ingress.kubernetes.io/request-timeout: "300s"
 spec:
   tls:
     - hosts:
