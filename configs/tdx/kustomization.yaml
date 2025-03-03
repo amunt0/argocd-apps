@@ -2,15 +2,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: tdx
 resources:
-  - namespace.yaml
   - configmap.yaml
   - serviceaccount.yaml
   - role.yaml
-  - rolebinding.yaml
   - pvc.yaml
   - deployment-teepod.yaml
   - deployment-kms.yaml
   - deployment-tproxy.yaml
-  - service-teepod.yaml
-  - service-kms.yaml
-  - service-tproxy.yaml
+  - service.yaml
