@@ -57,6 +57,10 @@ spec:
           hostPath:
             path: /mnt/minio/series
             type: Directory
+        - name: movies
+          hostPath:
+            path: /mnt/minio/movies
+            type: Directory
 ---
 apiVersion: v1
 kind: Service
