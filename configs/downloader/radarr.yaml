@@ -48,7 +48,9 @@ spec:
           persistentVolumeClaim:
             claimName: radarr-config-pvc
         - name: downloads
-          emptyDir: {}
+          hostPaht:
+            path: /mnt/ssd/downloads
+            type: Directory
         - name: movies
           hostPath:
             path: /mnt/minio/movies

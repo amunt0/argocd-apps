@@ -52,7 +52,9 @@ spec:
           persistentVolumeClaim:
             claimName: sonarr-config-pvc
         - name: downloads
-          emptyDir: {}
+          hostPath:
+            path:/mnt/ssd/downloads
+            type: Directory
         - name: series
           hostPath:
             path: /mnt/minio/series
