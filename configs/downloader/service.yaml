@@ -1,75 +1,112 @@
+# Radarr Services
+apiVersion: v1
+kind: Service
+metadata:
+  name: radarr-server-lb
+  namespace: media
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: "radarr.home"
+    external-dns.alpha.kubernetes.io/ingress-hostname-source: "service-annotation-only"
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 7878
+      name: http
+    - port: 443
+      targetPort: 7878
+      name: https
+  selector:
+    app: radarr
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: radarr-lb
+  name: radarr
   namespace: media
-  annotations:
-    metallb.universe.tf/loadBalancerIPs: "192.168.71.14"    
-    external-dns.alpha.kubernetes.io/hostname: "radarr.home"
-    external-dns.alpha.kubernetes.io/ingress-hostname-source: "service-annotation-only"
   labels:
     app: radarr
 spec:
-  selector:
-    app: radarr
+  type: ClusterIP
   ports:
     - port: 7878
       targetPort: 7878
-      protocol: TCP
       name: web
-    - port: 443
-      targetPort: 7878
-      protocol: TCP
-      name: https
-  type: LoadBalancer
+  selector:
+    app: radarr
+
+# Sonarr Services
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: sonarr-lb
+  name: sonarr-server-lb
   namespace: media
   annotations:
-    metallb.universe.tf/loadBalancerIPs: "192.168.71.15"    
     external-dns.alpha.kubernetes.io/hostname: "sonarr.home"
     external-dns.alpha.kubernetes.io/ingress-hostname-source: "service-annotation-only"
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8989
+      name: http
+    - port: 443
+      targetPort: 8989
+      name: https
+  selector:
+    app: sonarr
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonarr
+  namespace: media
   labels:
     app: sonarr
 spec:
-  selector:
-    app: sonarr
+  type: ClusterIP
   ports:
     - port: 8989
       targetPort: 8989
-      protocol: TCP
       name: web
-    - port: 443
-      targetPort: 8989
-      protocol: TCP
-      name: https
-  type: LoadBalancer
+  selector:
+    app: sonarr
+
+# Prowlarr Services
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: prowlarr-lb
+  name: prowlarr-server-lb
   namespace: media
   annotations:
-    metallb.universe.tf/loadBalancerIPs: "192.168.71.16"    
     external-dns.alpha.kubernetes.io/hostname: "prowlarr.home"
     external-dns.alpha.kubernetes.io/ingress-hostname-source: "service-annotation-only"
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 9696
+      name: http
+    - port: 443
+      targetPort: 9696
+      name: https
+  selector:
+    app: prowlarr
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prowlarr
+  namespace: media
   labels:
     app: prowlarr
 spec:
-  selector:
-    app: prowlarr
+  type: ClusterIP
   ports:
     - port: 9696
       targetPort: 9696
-      protocol: TCP
       name: web
-    - port: 443
-      targetPort: 9696
-      protocol: TCP
-      name: https
-  type: LoadBalancer
+  selector:
+    app: prowlarr
