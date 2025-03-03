@@ -1,0 +1,64 @@
+# Create GCP Service Account for TDX
+apiVersion: iam.gcp.crossplane.io/v1beta1
+kind: ServiceAccount
+metadata:
+  name: crossplane-tdx-kms
+  namespace: crossplane-system
+spec:
+  forProvider:
+    displayName: "TDX KMS Service Account"
+    description: "Service account for TDX Key Management Service"
+    projectRef:
+      name: "697085482582"
+  providerConfigRef:
+    name: gcp-provider
+---
+# Grant necessary permissions to the service account
+apiVersion: iam.gcp.crossplane.io/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: tdx-kms-confidential-computing
+  namespace: crossplane-system
+spec:
+  forProvider:
+    role: roles/confidentialcomputing.workloadUser
+    member: serviceAccount:${.serviceAccountRef.external}
+    resource: projects/697085482582
+    serviceAccountRef:
+      name: crossplane-tdx-kms
+  providerConfigRef:
+    name: gcp-provider
+---
+# Grant KMS permissions to the service account
+apiVersion: iam.gcp.crossplane.io/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: tdx-kms-crypto
+  namespace: crossplane-system
+spec:
+  forProvider:
+    role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    member: serviceAccount:${.serviceAccountRef.external}
+    resource: projects/697085482582
+    serviceAccountRef:
+      name: crossplane-tdx-kms
+  providerConfigRef:
+    name: gcp-provider
+---
+# Allow Kubernetes service account to act as GCP service account
+apiVersion: iam.gcp.crossplane.io/v1beta1
+kind: IAMServiceAccountPolicy
+metadata:
+  name: tdx-kms-binding
+  namespace: crossplane-system
+spec:
+  forProvider:
+    serviceAccountRef:
+      name: crossplane-tdx-kms
+    policy:
+      bindings:
+        - role: roles/iam.workloadIdentityUser
+          members:
+            - serviceAccount:697085482582.svc.id.goog[tdx-system/tdx-kms-sa]
+  providerConfigRef:
+    name: gcp-provider

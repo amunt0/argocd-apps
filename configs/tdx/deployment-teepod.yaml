@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teepod
+  namespace: tdx
+  labels:
+    app: teepod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: teepod
+  template:
+    metadata:
+      labels:
+        app: teepod
+    spec:
+      nodeSelector:
+        cloud.google.com/gke-confidential-nodes: "true"
+      containers:
+      - name: teepod
+        image: ghcr.io/confidential-containers/teepod:latest
+        ports:
+        - containerPort: 9080
+        volumeMounts:
+        - name: config
+          mountPath: /etc/tdx/teepod.toml
+          subPath: teepod.toml
+        securityContext:
+          privileged: true  # Required for managing VMs
+      volumes:
+      - name: config
+        configMap:
+          name: tdx-config
+          items:
+          - key: teepod.toml
+            path: teepod.toml

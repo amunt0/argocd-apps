@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kms
+  namespace: tdx
+  labels:
+    app: kms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kms
+  template:
+    metadata:
+      labels:
+        app: kms
+      annotations:
+        # Enable GCP Confidential Space attestation
+        confidential-space.security.cloud.google.com: "true"
+    spec:
+      serviceAccountName: tdx-kms-sa
+      nodeSelector:
+        cloud.google.com/gke-confidential-nodes: "true"
+      containers:
+      - name: kms
+        image: gcr.io/gce-confidential-computing/confidential-space-kms:latest
+        ports:
+        - containerPort: 9043
+        env:
+        - name: ATTESTATION_SERVICE
+          value: "confidential-space"
+        - name: REGION
+          value: "europe-west-4"
+        volumeMounts:
+        - name: config
+          mountPath: /etc/tdx/kms.toml
+          subPath: kms.toml
+        - name: certs
+          mountPath: /etc/tdx/certs
+      volumes:
+      - name: config
+        configMap:
+          name: tdx-config
+          items:
+          - key: kms.toml
+            path: kms.toml
+      - name: certs
+        persistentVolumeClaim:
+          claimName: tdx-certs
