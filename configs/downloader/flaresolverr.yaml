@@ -25,12 +25,21 @@ spec:
               value: "Etc/UTC"
             - name: CAPTCHA_SOLVER
               value: "none"
+            - name: PORT
+              value: "8191"
           ports:
             - containerPort: 8191
               name: web
+              protocol: TCP
+            - containerPort: 80
+              name: http
+              protocol: TCP
+            - containerPort: 443
+              name: https
+              protocol: TCP
           resources:
             requests:
               cpu: 100m
               memory: 128Mi
             limits:
-              memory: 300Mi
+              memory: 400Mi
