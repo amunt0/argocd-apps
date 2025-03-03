@@ -1,0 +1,20 @@
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-gcp
+spec:
+  package: crossplane/provider-gcp:v0.21.0
+---
+# Service account for GCP Provider - stored in Secret Manager or similar
+apiVersion: gcp.crossplane.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: gcp-provider-config
+spec:
+  projectID: 697085482582
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: gcp-credentials
+      key: credentials.json    
