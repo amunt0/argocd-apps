@@ -6,6 +6,6 @@ resources:
   - sonarr.yaml
   - radarr.yaml
   - prowlarr.yaml
-  - flaresolver.yaml  
+  - flaresolverr.yaml  
   - pvc.yaml
   - ingress.yaml
