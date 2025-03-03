@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flaresolverr
+  namespace: downloader
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flaresolverr
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: flaresolverr
+    spec:
+      containers:
+        - name: flaresolverr
+          image: ghcr.io/flaresolverr/flaresolverr:latest
+          env:
+            - name: LOG_LEVEL
+              value: "info"
+            - name: TZ
+              value: "Etc/UTC"
+            - name: CAPTCHA_SOLVER
+              value: "none"
+          ports:
+            - containerPort: 8191
+              name: web
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 200Mi
