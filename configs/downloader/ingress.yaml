@@ -3,7 +3,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: radarr
-  namespace: media
+  namespace: downloader
   annotations:
     cert-manager.io/cluster-issuer: "selfsigned-issuer"
     kubernetes.io/ingress.class: "traefik"
@@ -36,7 +36,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: sonarr
-  namespace: media
+  namespace: downloader
   annotations:
     cert-manager.io/cluster-issuer: "selfsigned-issuer"
     kubernetes.io/ingress.class: "traefik"
@@ -69,7 +69,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: prowlarr
-  namespace: media
+  namespace: downloader
   annotations:
     cert-manager.io/cluster-issuer: "selfsigned-issuer"
     kubernetes.io/ingress.class: "traefik"
