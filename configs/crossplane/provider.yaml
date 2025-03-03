@@ -11,7 +11,7 @@ kind: ProviderConfig
 metadata:
   name: gcp-provider-config
 spec:
-  projectID: 697085482582
+  projectID: "697085482582"
   credentials:
     source: Secret
     secretRef:
