@@ -63,12 +63,9 @@ spec:
       containers:
       - name: covalidator
         image: inconetwork/covalidator:9275524
-        command:
-        - "cat /root/config/covalidator.toml && /app/covalidator"
-        - "start"
-        - "--home=/root"
-        - "--keyring-backend=test"
-        - "--grpc-insecure"
+        command: ["/bin/sh", "-c"]
+        args:
+        - "cat /root/config/covalidator.toml && /app/covalidator start --home=/root --keyring-backend=test --grpc-insecure"
         ports:
         - containerPort: 50055
           name: grpc
