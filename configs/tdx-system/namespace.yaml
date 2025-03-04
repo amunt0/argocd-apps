@@ -1,8 +1,0 @@
-# configs/tdx-system/namespace.yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: tdx-system
-  labels:
-    name: tdx-system
-    confidential-computing: "true"
