@@ -34,6 +34,7 @@ spec:
         - |
           cp -n /tmp/last-block/lastBlock.txt /root/lastBlock.txt
           cp -n /tmp/request-counter/requestCounter.txt /root/requestCounter.txt
+          touch /root/config/client.toml
           chown 1000:1000 /root/config/client.toml /root/lastBlock.txt /root/requestCounter.txt
           echo "Environment setup completed successfully"
         volumeMounts:
