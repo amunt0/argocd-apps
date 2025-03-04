@@ -7,10 +7,10 @@ metadata:
 data:
   covalidator.toml: |
     host-chain-rpc-url = "https://base-sepolia.g.alchemy.com/v2/HWGi2fVKYhTkhHLTxNWWPrgj2YdlJuXq"
-    l1-enabled = false
-    compute-type = 0
-    inco-executor-addr = "0x0C890f89962660CeAD67dA3D6121e43ffbdc74C3"
-    host-chain-id = 11155111
+    l1Enabled = false
+    computeType = 0
+    inco-executor-addr = "0x62f3C34a47963FFD0c9Cc331Da968f22Bd697586"
+    host-chain-id = 84532
     covalidator-name = "covalidator"
     grpc-server-address = "0.0.0.0:50055"
     block-offset-dir = "/root"
@@ -18,7 +18,7 @@ data:
     ecies-private-key = "0x587da1e3c889f9e3852ab593852ad520f296281d1af303136b7421e31250c34d"
     inco-executor-type = "IncoLite"
     expose-kms-service = true
-    decryption-handler-addr = "0x0C890f89962660CeAD67dA3D6121e43ffbdc74C3"
+    decryption-handler-addr = "0x62f3C34a47963FFD0c9Cc331Da968f22Bd697586"
     callback-private-key = "de5fcdf769b02b4378557f1f17309f9c3537d490e4c8489951d8213a3dea2685"
 ---
 apiVersion: v1
