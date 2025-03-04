@@ -11,7 +11,7 @@ spec:
     path: configs/crossplane/tdx
   destination:
     server: https://kubernetes.default.svc
-    namespace: crossplane-system
+    namespace: crossplane
   syncPolicy:
     automated:
       prune: true

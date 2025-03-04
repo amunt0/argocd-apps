@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: tdx
+  name: tdx-apps
   namespace: argocd
 spec:
   project: apps
   source:
     repoURL: https://github.com/amunt0/argocd-apps
     targetRevision: HEAD
-    path: configs/tdx
+    path: configs/tdx-apps
   destination:
     server: https://kubernetes.default.svc
-    namespace: tdx
+    namespace: tdx-apps
   syncPolicy:
     automated:
       prune: true
