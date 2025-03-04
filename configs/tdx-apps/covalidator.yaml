@@ -32,48 +32,45 @@ spec:
         - sh
         - -c
         - |
-          # Create config directory if it doesn't exist
-          mkdir -p /root/config
-          
-          # Copy the configmap contents to writable location
-          cp -f /tmp/config/* /root/config/
-          
-          # Copy other files
           cp -n /tmp/last-block/lastBlock.txt /root/lastBlock.txt
           cp -n /tmp/request-counter/requestCounter.txt /root/requestCounter.txt
-          
-          # Display for debugging
-          ls -lrt /root/
-          ls -lrt /root/config/
-          
-          cat /root/config/*
-
+          chown 1000:1000 /root/config/client.toml /root/lastBlock.txt /root/requestCounter.txt
           echo "Environment setup completed successfully"
         volumeMounts:
         - name: storage
           mountPath: "/root"
-        - name: config
-          mountPath: "/tmp/config"
         - name: last-block
           mountPath: "/tmp/last-block"
         - name: request-counter
           mountPath: "/tmp/request-counter"
+        - name: config
+          mountPath: "/etc/covalidator"
         securityContext:
           allowPrivilegeEscalation: false
+          runAsUser: 1000
+          runAsGroup: 1000
       containers:
       - name: covalidator
-        image: inconetwork/covalidator:9275524
-        command: ["/bin/sh", "-c"]
-        args:
-        - "cat /root/config/covalidator.toml && /app/covalidator start --home=/root --keyring-backend=test --grpc-insecure"
+        image: inconetwork/covalidator:3d5f031
+        command: 
+        - "/app/covalidator"
+        - "start"
+        - "--home=/root"
+        - "--keyring-backend=test"
+        - "--grpc-insecure"
         ports:
         - containerPort: 50055
           name: grpc
         volumeMounts:
         - name: storage
           mountPath: "/root"
+        - name: config
+          mountPath: "/root/config/covalidator.toml"
+          subPath: "covalidator.toml"
         securityContext:
           allowPrivilegeEscalation: false
+          runAsUser: 1000
+          runAsGroup: 1000
         env:
         - name: SECRET_ID
           value: "projects/697085482582/secrets/tdx-app-secret/versions/latest"
