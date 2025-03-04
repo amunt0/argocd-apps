@@ -44,14 +44,13 @@ spec:
         - name: request-counter
           mountPath: "/tmp/request-counter"
         - name: config
-          mountPath: "/etc/covalidator"
+          mountPath: "/root/config"
         securityContext:
           allowPrivilegeEscalation: false
       containers:
       - name: covalidator
         image: inconetwork/covalidator:9275524
         command:
-        - "cat /root/config/covalidator.toml"  
         - "/app/covalidator"
         - "start"
         - "--home=/root"
@@ -64,8 +63,8 @@ spec:
         - name: storage
           mountPath: "/root"
         - name: config
-          mountPath: "/root/config/covalidator.toml"
-          subPath: "covalidator.toml"
+          mountPath: "/root/config"
+            #          subPath: "covalidator.toml"
         securityContext:
           allowPrivilegeEscalation: false
         env:
