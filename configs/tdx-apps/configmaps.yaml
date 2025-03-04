@@ -7,8 +7,8 @@ metadata:
 data:
   covalidator.toml: |
     host-chain-rpc-url = "https://base-sepolia.g.alchemy.com/v2/HWGi2fVKYhTkhHLTxNWWPrgj2YdlJuXq"
-    l1enabled = false
-    computeType = 0
+    l1-enabled = false
+    compute-type = 0
     inco-executor-addr = "0x0C890f89962660CeAD67dA3D6121e43ffbdc74C3"
     host-chain-id = 11155111
     covalidator-name = "covalidator"
