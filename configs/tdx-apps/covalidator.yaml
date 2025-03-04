@@ -48,7 +48,7 @@ spec:
           allowPrivilegeEscalation: false
       containers:
       - name: covalidator
-        image: inconetwork/covalidator:3d5f031
+        image: inconetwork/covalidator:9275524
         command: 
         - "/app/covalidator"
         - "start"
