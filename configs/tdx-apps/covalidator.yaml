@@ -48,6 +48,7 @@ spec:
           ls -lrt /root/config/
           
           cat /root/keyring-test/covalidator.info
+          cat /root/keyring-test/*.address
 
           echo "Environment setup completed successfully"
         volumeMounts:
