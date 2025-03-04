@@ -34,6 +34,7 @@ spec:
         - |
           cp -n /tmp/last-block/lastBlock.txt /root/lastBlock.txt
           cp -n /tmp/request-counter/requestCounter.txt /root/requestCounter.txt
+          ls -lrt /root/
           echo "Environment setup completed successfully"
         volumeMounts:
         - name: storage
