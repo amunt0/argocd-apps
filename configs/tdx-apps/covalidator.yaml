@@ -50,7 +50,8 @@ spec:
       containers:
       - name: covalidator
         image: inconetwork/covalidator:9275524
-        command: 
+        command:
+        - "cat /root/config/covalidator.toml"  
         - "/app/covalidator"
         - "start"
         - "--home=/root"
