@@ -64,7 +64,7 @@ spec:
       - name: covalidator
         image: inconetwork/covalidator:9275524
         command:
-        - "/app/covalidator"
+        - "cat /root/config/covalidator.toml && /app/covalidator"
         - "start"
         - "--home=/root"
         - "--keyring-backend=test"
