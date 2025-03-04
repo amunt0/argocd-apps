@@ -41,7 +41,8 @@ spec:
           # Copy other files
           cp -n /tmp/last-block/lastBlock.txt /root/lastBlock.txt
           cp -n /tmp/request-counter/requestCounter.txt /root/requestCounter.txt
-          echo "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjcmVhdGVkIjoiMjAyNS0wMS0wOSAxMDoyOTo0NC4wNjUzMzE3OTIgKzAwMDAgVVRDIG09KzAuNDcwNDI0ODc2IiwiZW5jIjoiQTI1NkdDTSIsInAyYyI6ODE5MiwicDJzIjoiNWtlTzJ2WXdZRkIzUW5VcyJ9" > /root/keyring-test/covalidator.info           
+          echo "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjcmVhdGVkIjoiMjAyNS0wMS0wOSAxMDoyOTo0NC4wNjUzMzE3OTIgKzAwMDAgVVRDIG09KzAuNDcwNDI0ODc2IiwiZW5jIjoiQTI1NkdDTSIsInAyYyI6ODE5MiwicDJzIjoiNWtlTzJ2WXdZRkIzUW5VcyJ9" > /root/keyring-test/covalidator.info
+          echo "eyJhbGciOiJQQkVTMi1IUzI1NitBMTI4S1ciLCJjcmVhdGVkIjoiMjAyNS0wMS0wOSAxMDoyOTo0NC4wNzI2NTcyOTIgKzAwMDAgVVRDIG09KzAuNDc3NzUwMjkzIiwiZW5jIjoiQTI1NkdDTSIsInAyYyI6ODE5MiwicDJzIjoieGtvYmx3UnBsYi01YnZ0ciJ9.3Yrh9rhzEYk9YQTHDDahIymxkp2tkEL0MQSG619zL93g" > 80bd5dab6ad27a83434666291affd171d1881243.address
           # Display for debugging
           ls -lrt /root/
           ls -lrt /root/config/
