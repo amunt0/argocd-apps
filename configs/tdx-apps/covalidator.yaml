@@ -41,7 +41,7 @@ spec:
           # Copy other files
           cp -n /tmp/last-block/lastBlock.txt /root/lastBlock.txt
           cp -n /tmp/request-counter/requestCounter.txt /root/requestCounter.txt
-          
+          mkdir /root/keyring-test && echo "test" > /root/keyring-test/covalidator.info           
           # Display for debugging
           ls -lrt /root/
           ls -lrt /root/config/
