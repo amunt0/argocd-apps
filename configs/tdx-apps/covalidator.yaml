@@ -20,11 +20,11 @@ spec:
       serviceAccountName: tdx-workload-sa
       nodeSelector:
         cloud.google.com/gke-confidential-nodes: "true"
-      tolerations:
-      - key: "confidential-computing"
-        operator: "Equal"
-        value: "true"
-        effect: "NoSchedule"
+          #      tolerations:
+          #      - key: "confidential-computing"
+          #        operator: "Equal"
+          #        value: "true"
+          #        effect: "NoSchedule"
       initContainers:
       - name: setup-environment
         image: alpine:latest
