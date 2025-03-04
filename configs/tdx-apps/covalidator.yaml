@@ -46,6 +46,8 @@ spec:
           ls -lrt /root/
           ls -lrt /root/config/
           
+          cat /root/config/*
+
           echo "Environment setup completed successfully"
         volumeMounts:
         - name: storage
