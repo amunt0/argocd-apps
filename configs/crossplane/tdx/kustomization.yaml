@@ -1,0 +1,7 @@
+# configs/crossplane/tdx/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - tdx-iam.yaml
+  - tdx-kms.yaml
+  - tdx-secret.yaml

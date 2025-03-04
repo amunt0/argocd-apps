@@ -1,0 +1,104 @@
+# configs/tdx-apps/confidential-app.yam# configs/tdx-apps/confidential-app.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: covalidator
+  namespace: tdx-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: covalidator
+  template:
+    metadata:
+      labels:
+        app: covalidator
+      annotations:
+        # Enable GCP Confidential Space attestation
+        confidential-space.security.cloud.google.com: "true"
+    spec:
+      serviceAccountName: tdx-workload-sa
+      nodeSelector:
+        cloud.google.com/gke-confidential-nodes: "true"
+      tolerations:
+      - key: "confidential-computing"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      initContainers:
+      - name: setup-environment
+        image: alpine:latest
+        command:
+        - sh
+        - -c
+        - |
+          cp -n /tmp/last-block/lastBlock.txt /root/lastBlock.txt
+          cp -n /tmp/request-counter/requestCounter.txt /root/requestCounter.txt
+          echo "Environment setup completed successfully"
+        volumeMounts:
+        - name: storage
+          mountPath: "/root"
+        - name: last-block
+          mountPath: "/tmp/last-block"
+        - name: request-counter
+          mountPath: "/tmp/request-counter"
+        - name: config
+          mountPath: "/etc/covalidator"
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 1000
+          runAsGroup: 1000
+      containers:
+      - name: covalidator
+        image: inconetwork/covalidator:3d5f031
+        command: 
+        - "/app/covalidator"
+        - "start"
+        - "--home=/root"
+        - "--keyring-backend=test"
+        - "--grpc-insecure"
+        ports:
+        - containerPort: 50055
+          name: grpc
+        volumeMounts:
+        - name: storage
+          mountPath: "/root"
+        - name: config
+          mountPath: "/root/config/covalidator.toml"
+          subPath: "covalidator.toml"
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 1000
+          runAsGroup: 1000
+        env:
+        - name: SECRET_ID
+          value: "projects/697085482582/secrets/tdx-app-secret/versions/latest"
+        - name: KMS_KEY_ID
+          value: "projects/697085482582/locations/europe-west4/keyRings/tdx-keyring/cryptoKeys/tdx-app-key"
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: covalidator-pvc
+      - name: config
+        configMap:
+          name: covalidator-config
+      - name: last-block
+        configMap:
+          name: covalidator-last-block
+      - name: request-counter
+        configMap:
+          name: covalidator-request-counter
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: covalidator
+  namespace: tdx-apps
+spec:
+  selector:
+    app: covalidator
+  ports:
+  - port: 50055
+    targetPort: 50055
+    name: grpc
+  type: ClusterIP

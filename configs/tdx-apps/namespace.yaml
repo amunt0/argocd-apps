@@ -1,0 +1,8 @@
+# configs/tdx-apps/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tdx-apps
+  labels:
+    name: tdx-apps
+    confidential-computing: "true"
