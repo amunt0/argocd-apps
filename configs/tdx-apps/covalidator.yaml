@@ -68,8 +68,8 @@ spec:
         image: inconetwork/covalidator:9275524
         command: ["/bin/sh", "-c"]
         args:
-          #- "sleep 3600"   
-        - "cat /root/config/covalidator.toml && /app/covalidator start --home=/root --keyring-backend=test --grpc-insecure"
+        - "sleep 3600"   
+          #- "cat /root/config/covalidator.toml && /app/covalidator start --home=/root --keyring-backend=test --grpc-insecure"
         ports:
         - containerPort: 50055
           name: grpc
