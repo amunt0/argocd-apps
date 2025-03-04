@@ -66,8 +66,6 @@ spec:
           subPath: "covalidator.toml"
         securityContext:
           allowPrivilegeEscalation: false
-          runAsUser: 1000
-          runAsGroup: 1000
         env:
         - name: SECRET_ID
           value: "projects/697085482582/secrets/tdx-app-secret/versions/latest"
