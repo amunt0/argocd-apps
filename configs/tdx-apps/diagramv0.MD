@@ -1,3 +1,6 @@
+# diagram v0
+
+```mermaid
 flowchart TB
     subgraph "Google Cloud Platform"
         subgraph "TDX Secured Environment"

@@ -1,3 +1,6 @@
+# diagram v2
+
+```mermaid
 flowchart TD
     subgraph "GCP Infrastructure"
         GKE["GCP Kubernetes Engine"]

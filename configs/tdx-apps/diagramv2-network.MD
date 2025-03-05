@@ -1,3 +1,6 @@
+# diagram v2 - network
+
+```mermaid
 flowchart TD
     subgraph "Central Infrastructure"
         WGManager["Centralized WireGuard\nKey Management"]
