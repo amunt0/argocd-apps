@@ -18,4 +18,3 @@ spec:
       namespace: crossplane
       name: gcp-credentials
       key: credentials.json
-
