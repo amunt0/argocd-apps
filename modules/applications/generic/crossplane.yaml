@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://charts.crossplane.io/stable
     chart: crossplane
-    targetRevision: "1.14.5" # Latest stable version as of 2024
+    targetRevision: "1.19.0"
     helm:
       values: |
         replicas: 1
