@@ -1,11 +1,11 @@
-apiVersion: pkg.crossplane.io/v1beta1
+apiVersion: pkg.crossplane.io/v1
 kind: Provider
 metadata:
   name: provider-gcp
 spec:
   package: crossplane/provider-gcp:master
 ---
-apiVersion: gcp.crossplane.io/v1beta1
+apiVersion: gcp.crossplane.io/v1
 kind: ProviderConfig
 metadata:
   name: gcp-provider
