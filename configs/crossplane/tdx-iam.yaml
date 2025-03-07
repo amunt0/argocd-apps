@@ -1,5 +1,5 @@
 # Create GCP Service Account for TDX
-apiVersion: iam.gcp.crossplane.io/v1
+apiVersion: iam.gcp.crossplane.io/v1alpha1
 kind: ServiceAccount
 metadata:
   name: crossplane-tdx-kms
@@ -14,7 +14,7 @@ spec:
     name: gcp-provider
 ---
 # Allow Kubernetes service account to act as GCP service account
-apiVersion: iam.gcp.crossplane.io/v1
+apiVersion: iam.gcp.crossplane.io/v1alpha1
 kind: ServiceAccountPolicy
 metadata:
   name: tdx-kms-binding
