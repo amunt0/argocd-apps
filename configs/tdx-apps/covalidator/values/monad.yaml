@@ -1,3 +1,7 @@
+image:
+  name: "inconetwork/covalidator"
+  version: "1808e37"
+
 network:
   name: monad
   rpcUrl: "https://monad-testnet.g.alchemy.com/v2/HWGi2fVKYhTkhHLTxNWWPrgj2YdlJuXq"

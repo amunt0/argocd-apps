@@ -47,7 +47,7 @@ spec:
           allowPrivilegeEscalation: false
       containers:
       - name: covalidator
-        image: inconetwork/covalidator:9275524
+        image: {{ .Values.image.name }}:{{ .Values.image.version }}
         command: ["/bin/sh", "-c"]
         args:
         - "cat /root/config/covalidator.toml && /app/covalidator start --home=/root --keyring-backend=test --grpc-insecure"
