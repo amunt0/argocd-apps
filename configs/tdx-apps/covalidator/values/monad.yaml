@@ -8,7 +8,7 @@ network:
   chainId: 10143
   executorAddress: "0x1234567890123456789012345678901234567890"
   decryptionHandlerAddr: "0x1234567890123456789012345678901234567890"
-  startBlockNumber: 6602336
+  startBlockNumber: "6602336"
 
 resources:
   storage: 5Gi
