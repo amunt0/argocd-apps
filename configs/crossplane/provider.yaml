@@ -3,7 +3,7 @@ kind: Provider
 metadata:
   name: provider-gcp
 spec:
-  package: crossplane/provider-gcp:v0.22.0
+  package: crossplane/provider-gcp:master
 ---
 apiVersion: gcp.crossplane.io/v1beta1
 kind: ProviderConfig
