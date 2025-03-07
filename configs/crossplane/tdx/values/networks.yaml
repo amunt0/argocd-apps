@@ -1,7 +1,10 @@
 networks:
   - name: base-sepolia
     rotationPeriod: 7776000s
+    domain: grpc.base-sepolia.testnet.denver.org
   - name: monad
     rotationPeriod: 7776000s
+    domain: grpc.monad.testnet.denver.org
   - name: ethereum-sepolia
     rotationPeriod: 7776000s
+    domain: grpc.ethereum-sepolia.testnet.denver.org

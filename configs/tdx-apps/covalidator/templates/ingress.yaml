@@ -1,0 +1,58 @@
+---
+# BackendConfig for gRPC support
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: {{ .Values.network.name }}-grpc-config
+  namespace: tdx-apps
+spec:
+  protocolHint:
+    protocol: GRPC
+  timeoutSec: 30
+  connectionDraining:
+    drainingTimeoutSec: 300
+
+---
+# Update the service to include the backend config annotation
+# This overwrites your existing service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.network.name }}-covalidator
+  namespace: tdx-apps
+  annotations:
+    cloud.google.com/backend-config: '{"default": "{{ .Values.network.name }}-grpc-config"}'
+spec:
+  selector:
+    app: {{ .Values.network.name }}-covalidator
+    network: {{ .Values.network.name }}
+  ports:
+  - port: 50055
+    targetPort: 50055
+    name: grpc
+  type: ClusterIP
+
+---
+# Ingress resource for the covalidator
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.network.name }}-covalidator-ingress
+  namespace: tdx-apps
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "{{ .Values.network.name }}-validator-ip"
+    networking.gke.io/managed-certificates: "denver-wildcard-cert"
+    kubernetes.io/ingress.allow-http: "false"  # Force HTTPS only
+spec:
+  rules:
+  - host: {{ .Values.network.domain }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.network.name }}-covalidator
+            port:
+              number: 50055

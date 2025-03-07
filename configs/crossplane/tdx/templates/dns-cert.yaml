@@ -1,0 +1,33 @@
+---
+# Create a static IP address for each network validator
+{{- range .Values.networks }}
+---
+apiVersion: compute.gcp.crossplane.io/v1beta1
+kind: Address
+metadata:
+  name: {{ .name }}-validator-ip
+  namespace: crossplane-system
+spec:
+  forProvider:
+    region: europe-west4
+    addressType: EXTERNAL
+    name: {{ .name }}-validator-ip
+    description: "Static IP for {{ .name }} validator ingress"
+  providerConfigRef:
+    name: gcp-provider
+{{- end }}
+
+---
+# Create a managed certificate for denver.org domain
+apiVersion: networking.gcp.crossplane.io/v1beta1
+kind: ManagedCertificate
+metadata:
+  name: denver-wildcard-cert
+  namespace: crossplane-system
+spec:
+  forProvider:
+    domains:
+      - "*.testnet.denver.org"
+    location: global
+  providerConfigRef:
+    name: gcp-provider
