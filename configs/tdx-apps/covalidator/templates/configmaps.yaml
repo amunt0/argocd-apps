@@ -6,7 +6,7 @@ metadata:
 data:
   covalidator.toml: |
     host-chain-rpc-url = "{{ .Values.network.rpcUrl }}"
-    l1-enabled = "{{ .Values.config.l1-enabled }}"
+    l1-enabled = {{ .Values.config.l1Enabled }}
     computeType = {{ .Values.config.computeType }}
     inco-executor-addr = "{{ .Values.network.executorAddress }}"
     host-chain-id = {{ .Values.network.chainId }}
