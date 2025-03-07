@@ -14,7 +14,7 @@ keys:
   callbackPrivateKey: "de5fcdf769b02b4378557f1f17309f9c3537d490e4c8489951d8213a3dea2685"
 
 config:
-  l1Enabled: false
+  l1-enabled: false
   computeType: 0
   incoExecutorType: "IncoLite"
   exposeKmsService: true
