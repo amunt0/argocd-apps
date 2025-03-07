@@ -1,4 +1,4 @@
-apiVersion: argoproj.io/v1apiVersion: argoproj.io/v1alpha1
+apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: monad-covalidator
@@ -6,8 +6,8 @@ metadata:
 spec:
   project: apps
   source:
-    repoURL: https://github.com/your-org/tdx-apps.git
-    targetRevision: main
+    repoURL: https://github.com/amunt0/argocd-apps
+    targetRevision: HEAD
     path: configs/tdx-apps/covalidator
     helm:
       valueFiles:
