@@ -4,7 +4,7 @@ metadata:
   name: monad-covalidator
   namespace: argocd
 spec:
-  project: default
+  project: apps
   source:
     repoURL: https://github.com/your-org/tdx-apps.git
     targetRevision: main
