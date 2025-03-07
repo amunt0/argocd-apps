@@ -2,7 +2,7 @@ apiVersion: kms.gcp.crossplane.io/v1alpha1
 kind: KeyRing
 metadata:
   name: tdx-keyring
-  namespace: crossplane-system
+  namespace: crossplane
 spec:
   forProvider:
     location: europe-west4

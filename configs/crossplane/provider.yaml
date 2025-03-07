@@ -15,6 +15,6 @@ spec:
   credentials:
     source: Secret
     secretRef:
-      namespace: crossplane-system
+      namespace: crossplane
       name: gcp-credentials
       key: credentials.json    

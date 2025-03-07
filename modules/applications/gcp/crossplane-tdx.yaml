@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tdx-crossplane-resources
+  namespace: argocd
+spec:
+  project: system
+  source:
+    repoURL: https://github.com/amunt0/argocd-apps
+    targetRevision: HEAD
+    path: configs/crossplane/tdx
+    helm:
+      valueFiles:
+        - values/networks.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crossplane
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

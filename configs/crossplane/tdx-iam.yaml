@@ -3,7 +3,7 @@ apiVersion: iam.gcp.crossplane.io/v1beta1
 kind: ServiceAccount
 metadata:
   name: crossplane-tdx-kms
-  namespace: crossplane-system
+  namespace: crossplane
 spec:
   forProvider:
     displayName: "TDX KMS Service Account"
@@ -18,7 +18,7 @@ apiVersion: iam.gcp.crossplane.io/v1beta1
 kind: IAMPolicyMember
 metadata:
   name: tdx-kms-confidential-computing
-  namespace: crossplane-system
+  namespace: crossplane
 spec:
   forProvider:
     role: roles/confidentialcomputing.workloadUser
@@ -33,7 +33,7 @@ apiVersion: iam.gcp.crossplane.io/v1beta1
 kind: IAMPolicyMember
 metadata:
   name: tdx-kms-crypto
-  namespace: crossplane-system
+  namespace: crossplane
 spec:
   forProvider:
     role: roles/cloudkms.cryptoKeyEncrypterDecrypter
@@ -57,7 +57,7 @@ apiVersion: iam.gcp.crossplane.io/v1beta1
 kind: IAMServiceAccountPolicy
 metadata:
   name: tdx-kms-binding
-  namespace: crossplane-system
+  namespace: crossplane
 spec:
   forProvider:
     serviceAccountRef:

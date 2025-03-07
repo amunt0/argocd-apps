@@ -6,7 +6,7 @@ apiVersion: compute.gcp.crossplane.io/v1beta1
 kind: Address
 metadata:
   name: {{ .name }}-validator-ip
-  namespace: crossplane-system
+  namespace: crossplane
 spec:
   forProvider:
     region: europe-west4
@@ -23,7 +23,7 @@ apiVersion: networking.gcp.crossplane.io/v1beta1
 kind: ManagedCertificate
 metadata:
   name: denver-wildcard-cert
-  namespace: crossplane-system
+  namespace: crossplane
 spec:
   forProvider:
     domains:
