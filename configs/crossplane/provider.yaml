@@ -5,7 +5,6 @@ metadata:
 spec:
   package: crossplane/provider-gcp:v0.39.0
 ---
-# Service account for GCP Provider - stored in Secret Manager or similar
 apiVersion: gcp.crossplane.io/v1beta1
 kind: ProviderConfig
 metadata:

@@ -1,5 +1,5 @@
 # Create GCP Service Account for TDX
-apiVersion: iam.gcp.crossplane.io/v1
+apiVersion: iam.gcp.crossplane.io/v1beta1
 kind: ServiceAccount
 metadata:
   name: crossplane-tdx-kms
@@ -13,48 +13,9 @@ spec:
   providerConfigRef:
     name: gcp-provider
 ---
-# Grant necessary permissions to the service account
-apiVersion: iam.gcp.crossplane.io/v1
-kind: IAMPolicyMember
-metadata:
-  name: tdx-kms-confidential-computing
-  namespace: crossplane
-spec:
-  forProvider:
-    role: roles/confidentialcomputing.workloadUser
-    member: serviceAccount:${.serviceAccountRef.external}
-    resource: projects/697085482582
-    serviceAccountRef:
-      name: crossplane-tdx-kms
-  providerConfigRef:
-    name: gcp-provider
----
-apiVersion: iam.gcp.crossplane.io/v1
-kind: IAMPolicyMember
-metadata:
-  name: tdx-kms-crypto
-  namespace: crossplane
-spec:
-  forProvider:
-    role: roles/cloudkms.cryptoKeyEncrypterDecrypter
-    member: serviceAccount:${.serviceAccountRef.external}
-    resource: projects/697085482582
-    condition:
-      title: "TDX Covalidator Access Only"
-      description: "Allow access only from the covalidator service running in Confidential Space"
-      expression: |
-        request.auth.claims.google.cloud.confidentialcomputing.seAttestation.platform == 'CONFIDENTIAL_SPACE' &&
-        resource.name.startsWith('projects/697085482582/locations/europe-west4/keyRings/tdx-keyring/cryptoKeys/tdx-app-key') &&
-        request.auth.claims.google.cloud.confidentialcomputing.seAttestation.swName.endsWith('inconetwork/covalidator@sha256:905b777ea423c08472888a40425b8b2caa4609bf40350dd61139bc614aef275e') &&
-        request.auth.claims.sub == 'tdx-workload@697085482582.iam.gserviceaccount.com'
-    serviceAccountRef:
-      name: crossplane-tdx-kms
-  providerConfigRef:
-    name: gcp-provider
----
 # Allow Kubernetes service account to act as GCP service account
-apiVersion: iam.gcp.crossplane.io/v1
-kind: IAMServiceAccountPolicy
+apiVersion: iam.gcp.crossplane.io/v1beta1
+kind: ServiceAccountPolicy
 metadata:
   name: tdx-kms-binding
   namespace: crossplane
