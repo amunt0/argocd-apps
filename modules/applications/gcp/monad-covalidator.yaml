@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monad-covalidator
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/your-org/tdx-apps.git
+    targetRevision: main
+    path: configs/tdx-apps/covalidator
+    helm:
+      valueFiles:
+      - values/monad.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tdx-apps
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: truee

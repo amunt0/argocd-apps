@@ -1,0 +1,7 @@
+networks:
+  - name: base-sepolia
+    rotationPeriod: 7776000s
+  - name: monad
+    rotationPeriod: 7776000s
+  - name: ethereum-sepolia
+    rotationPeriod: 7776000s

@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.network.name }}-covalidator-config
+  namespace: tdx-apps
+data:
+  covalidator.toml: |
+    host-chain-rpc-url = "{{ .Values.network.rpcUrl }}"
+    l1Enabled = {{ .Values.config.l1Enabled }}
+    computeType = {{ .Values.config.computeType }}
+    inco-executor-addr = "{{ .Values.network.executorAddress }}"
+    host-chain-id = {{ .Values.network.chainId }}
+    covalidator-name = "{{ .Values.network.name }}-covalidator"
+    grpc-server-address = "0.0.0.0:50055"
+    block-offset-dir = "/root"
+    request-counter-dir = "/root"
+    ecies-private-key = "{{ .Values.keys.eciesPrivateKey }}"
+    inco-executor-type = "{{ .Values.config.incoExecutorType }}"
+    expose-kms-service = {{ .Values.config.exposeKmsService }}
+    decryption-handler-addr = "{{ .Values.network.decryptionHandlerAddr }}"
+    callback-private-key = "{{ .Values.keys.callbackPrivateKey }}"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.network.name }}-covalidator-last-block
+  namespace: tdx-apps
+data:
+  lastBlock.txt: "{{ .Values.network.startBlockNumber }}"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.network.name }}-covalidator-request-counter
+  namespace: tdx-apps
+data:
+  requestCounter.txt: "0"

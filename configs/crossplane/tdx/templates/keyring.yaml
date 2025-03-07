@@ -1,0 +1,10 @@
+apiVersion: kms.gcp.crossplane.io/v1alpha1
+kind: KeyRing
+metadata:
+  name: tdx-keyring
+  namespace: crossplane-system
+spec:
+  forProvider:
+    location: europe-west4
+  providerConfigRef:
+    name: gcp-provider

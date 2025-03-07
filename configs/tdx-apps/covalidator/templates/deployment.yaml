@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.network.name }}-covalidator
+  namespace: tdx-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.network.name }}-covalidator
+      network: {{ .Values.network.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.network.name }}-covalidator
+        network: {{ .Values.network.name }}
+      annotations:
+        confidential-space.security.cloud.google.com: "true"
+    spec:
+      serviceAccountName: {{ .Values.network.name }}-workload-sa
+      nodeSelector:
+        cloud.google.com/gke-confidential-nodes: "true"
+      initContainers:
+      - name: setup-environment
+        image: alpine:latest
+        command:
+        - sh
+        - -c
+        - |
+          mkdir -p /root/config
+          cp -f /tmp/config/* /root/config/
+          cp -n /tmp/last-block/lastBlock.txt /root/lastBlock.txt
+          cp -n /tmp/request-counter/requestCounter.txt /root/requestCounter.txt
+          ls -lrt /root/
+          ls -lrt /root/config/
+          echo "Environment setup completed successfully"
+        volumeMounts:
+        - name: storage
+          mountPath: "/root"
+        - name: config
+          mountPath: "/tmp/config"
+        - name: last-block
+          mountPath: "/tmp/last-block"
+        - name: request-counter
+          mountPath: "/tmp/request-counter"
+        securityContext:
+          allowPrivilegeEscalation: false
+      containers:
+      - name: covalidator
+        image: inconetwork/covalidator:9275524
+        command: ["/bin/sh", "-c"]
+        args:
+        - "cat /root/config/covalidator.toml && /app/covalidator start --home=/root --keyring-backend=test --grpc-insecure"
+        ports:
+        - containerPort: 50055
+          name: grpc
+        volumeMounts:
+        - name: storage
+          mountPath: "/root"
+        securityContext:
+          allowPrivilegeEscalation: false
+        env:
+        - name: SECRET_ID
+          value: "projects/697085482582/secrets/{{ .Values.network.name }}-covalidator-secret/versions/latest"
+        - name: KMS_KEY_ID
+          value: "projects/697085482582/locations/europe-west4/keyRings/tdx-keyring/cryptoKeys/{{ .Values.network.name }}-covalidator-key"
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: {{ .Values.network.name }}-covalidator-pvc
+      - name: config
+        configMap:
+          name: {{ .Values.network.name }}-covalidator-config
+      - name: last-block
+        configMap:
+          name: {{ .Values.network.name }}-covalidator-last-block
+      - name: request-counter
+        configMap:
+          name: {{ .Values.network.name }}-covalidator-request-counter
+

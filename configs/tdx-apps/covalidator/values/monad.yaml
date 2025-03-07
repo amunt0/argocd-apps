@@ -1,0 +1,20 @@
+network:
+  name: monad
+  rpcUrl: "https://monad-testnet.drpc.org"
+  chainId: 20482
+  executorAddress: "0x1234567890123456789012345678901234567890"
+  decryptionHandlerAddr: "0x1234567890123456789012345678901234567890"
+  startBlockNumber: 1000000
+
+resources:
+  storage: 2Gi
+
+keys:
+  eciesPrivateKey: "0x587da1e3c889f9e3852ab593852ad520f296281d1af303136b7421e31250c34d"
+  callbackPrivateKey: "de5fcdf769b02b4378557f1f17309f9c3537d490e4c8489951d8213a3dea2685"
+
+config:
+  l1Enabled: false
+  computeType: 0
+  incoExecutorType: "IncoLite"
+  exposeKmsService: true
