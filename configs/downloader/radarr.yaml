@@ -48,7 +48,7 @@ spec:
           persistentVolumeClaim:
             claimName: radarr-config-pvc
         - name: downloads
-          hostPaht:
+          hostPath:
             path: /mnt/ssd/downloads
             type: Directory
         - name: movies
