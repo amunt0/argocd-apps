@@ -1,7 +1,3 @@
-#!/bin/bash
-
-# Save the fixed Sonarr deployment
-cat > ./fixed-sonarr.yaml << 'EOF'
 apiVersion: apps/v1
 kind: Deployment
 metadata:
