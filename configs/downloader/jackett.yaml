@@ -45,18 +45,6 @@ spec:
               memory: 128Mi
             limits:
               memory: 512Mi
-          livenessProbe:
-            httpGet:
-              path: /UI/Login
-              port: 9117
-            initialDelaySeconds: 60
-            periodSeconds: 10
-          readinessProbe:
-            httpGet:
-              path: /UI/Login
-              port: 9117
-            initialDelaySeconds: 30
-            periodSeconds: 10
       volumes:
         - name: config
           persistentVolumeClaim:
