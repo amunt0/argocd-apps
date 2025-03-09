@@ -53,7 +53,7 @@ spec:
             claimName: sonarr-config-pvc
         - name: downloads
           hostPath:
-            path:/mnt/ssd/downloads
+            path: /mnt/ssd/downloads
             type: Directory
         - name: series
           hostPath:
