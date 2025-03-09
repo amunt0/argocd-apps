@@ -9,4 +9,3 @@ resources:
   - jackett.yaml  
   - flaresolverr.yaml  
   - pvc.yaml
-  - ingress.yaml
