@@ -1,0 +1,288 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-server
+  namespace: media
+  labels:
+    app: immich
+    component: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: immich
+      component: server
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: immich
+        component: server
+    spec:
+      initContainers:
+        - name: wait-for-db
+          image: postgres:14-alpine
+          command:
+            - sh
+            - -c
+            - |
+              echo "Checking if PostgreSQL database exists..."
+              until PGPASSWORD=$(cat /run/secrets/immich-db-password) psql -h $POSTGRES_HOST -U $POSTGRES_USER -c '\l' | grep -q "$POSTGRES_DB"; do
+                echo "Database $POSTGRES_DB does not exist yet. Waiting for database to be available..."
+                sleep 5
+              done
+              echo "Database $POSTGRES_DB exists! Proceeding with Immich deployment."
+          env:
+            - name: POSTGRES_HOST
+              value: postgres.data.svc.cluster.local
+            - name: POSTGRES_DB
+              value: mediadb
+            - name: POSTGRES_USER
+              value: postgres
+          volumeMounts:
+            - name: db-password
+              mountPath: /run/secrets/immich-db-password
+              subPath: password
+              readOnly: true
+      containers:
+        - name: immich-server
+          image: ghcr.io/immich-app/immich-server:v1.98.0
+          ports:
+            - containerPort: 3001
+              name: http
+          env:
+            - name: IMMICH_CONFIG_PATH
+              value: /etc/immich/.env
+          volumeMounts:
+            - name: immich-config
+              mountPath: /etc/immich/.env
+              subPath: .env
+            - name: db-password
+              mountPath: /run/secrets/immich-db-password
+              subPath: password
+              readOnly: true
+            - name: minio-secret
+              mountPath: /run/secrets/immich-minio-secret
+              subPath: secretKey
+              readOnly: true
+            - name: upload-data
+              mountPath: /usr/src/app/upload
+            - name: library-data
+              mountPath: /usr/src/app/library
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /server-info/ping
+              port: 3001
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /server-info/ping
+              port: 3001
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: immich-config
+          configMap:
+            name: immich-config
+        - name: db-password
+          secret:
+            secretName: nextcloud-db-creds
+            items:
+              - key: password
+                path: password
+        - name: minio-secret
+          secret:
+            secretName: nextcloud-minio-creds
+            items:
+              - key: secretKey
+                path: secretKey
+        - name: upload-data
+          persistentVolumeClaim:
+            claimName: immich-upload-pvc
+        - name: library-data
+          persistentVolumeClaim:
+            claimName: immich-library-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-microservices
+  namespace: media
+  labels:
+    app: immich
+    component: microservices
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: immich
+      component: microservices
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: immich
+        component: microservices
+    spec:
+      containers:
+        - name: immich-microservices
+          image: ghcr.io/immich-app/immich-server:v1.98.0
+          command: ["node", "microservices.js"]
+          env:
+            - name: IMMICH_CONFIG_PATH
+              value: /etc/immich/.env
+          volumeMounts:
+            - name: immich-config
+              mountPath: /etc/immich/.env
+              subPath: .env
+            - name: db-password
+              mountPath: /run/secrets/immich-db-password
+              subPath: password
+              readOnly: true
+            - name: minio-secret
+              mountPath: /run/secrets/immich-minio-secret
+              subPath: secretKey
+              readOnly: true
+            - name: upload-data
+              mountPath: /usr/src/app/upload
+            - name: library-data
+              mountPath: /usr/src/app/library
+            - name: cache-data
+              mountPath: /usr/src/app/cache
+          resources:
+            requests:
+              cpu: 300m
+              memory: 512Mi
+            limits:
+              memory: 2Gi
+      volumes:
+        - name: immich-config
+          configMap:
+            name: immich-config
+        - name: db-password
+          secret:
+            secretName: nextcloud-db-creds
+            items:
+              - key: password
+                path: password
+        - name: minio-secret
+          secret:
+            secretName: nextcloud-minio-creds
+            items:
+              - key: secretKey
+                path: secretKey
+        - name: upload-data
+          persistentVolumeClaim:
+            claimName: immich-upload-pvc
+        - name: library-data
+          persistentVolumeClaim:
+            claimName: immich-library-pvc
+        - name: cache-data
+          persistentVolumeClaim:
+            claimName: immich-cache-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-machine-learning
+  namespace: media
+  labels:
+    app: immich
+    component: machine-learning
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: immich
+      component: machine-learning
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: immich
+        component: machine-learning
+    spec:
+      containers:
+        - name: immich-machine-learning
+          image: ghcr.io/immich-app/immich-machine-learning:v1.98.0
+          env:
+            - name: IMMICH_CONFIG_PATH
+              value: /etc/immich/.env
+          volumeMounts:
+            - name: immich-config
+              mountPath: /etc/immich/.env
+              subPath: .env
+            - name: cache-data
+              mountPath: /usr/src/app/cache
+          resources:
+            requests:
+              cpu: 300m
+              memory: 512Mi
+            limits:
+              memory: 2Gi
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 3003
+            initialDelaySeconds: 60
+            periodSeconds: 10
+      volumes:
+        - name: immich-config
+          configMap:
+            name: immich-config
+        - name: cache-data
+          persistentVolumeClaim:
+            claimName: immich-cache-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-web
+  namespace: media
+  labels:
+    app: immich
+    component: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: immich
+      component: web
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: immich
+        component: web
+    spec:
+      containers:
+        - name: immich-web
+          image: ghcr.io/immich-app/immich-web:v1.98.0
+          env:
+            - name: IMMICH_CONFIG_PATH
+              value: /etc/immich/.env
+          volumeMounts:
+            - name: immich-config
+              mountPath: /etc/immich/.env
+              subPath: .env
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+      volumes:
+        - name: immich-config
+          configMap:
+            name: immich-config

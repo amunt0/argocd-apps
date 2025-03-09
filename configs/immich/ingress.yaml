@@ -1,0 +1,66 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: immich
+  namespace: media
+  annotations:
+    cert-manager.io/cluster-issuer: "selfsigned-issuer"
+    kubernetes.io/ingress.class: "traefik"
+    traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    external-dns.alpha.kubernetes.io/enabled: "true"
+    external-dns.alpha.kubernetes.io/hostname: "immich.home"
+    external-dns.alpha.kubernetes.io/ttl: "60"
+    # Immich-specific annotations
+    traefik.ingress.kubernetes.io/preserve-host: "true"
+    traefik.ingress.kubernetes.io/request-timeout: "300s"
+    # Security headers
+    traefik.ingress.kubernetes.io/middlewares: "media-immich-security-headers@kubernetescrd"
+spec:
+  tls:
+    - hosts:
+        - immich.home
+      secretName: immich-tls
+  rules:
+    - host: immich.home
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: immich-server
+                port:
+                  number: 3001
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: immich-security-headers
+  namespace: media
+spec:
+  headers:
+    customResponseHeaders:
+      X-Content-Type-Options: "nosniff"
+      X-XSS-Protection: "1; mode=block"
+      Referrer-Policy: "no-referrer"
+      X-Frame-Options: "SAMEORIGIN"
+      Strict-Transport-Security: "max-age=31536000; includeSubDomains"
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: immich-ip-access
+  namespace: media
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`192.168.71.14`)
+      kind: Rule
+      services:
+        - name: immich-server
+          port: 3001
+      middlewares:
+        - name: immich-ip-access
+          namespace: media

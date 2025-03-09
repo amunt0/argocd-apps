@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: immich-server
+  namespace: media
+  labels:
+    app: immich
+    component: server
+spec:
+  selector:
+    app: immich
+    component: server
+  ports:
+    - port: 3001
+      targetPort: 3001
+      protocol: TCP
+      name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: immich-microservices
+  namespace: media
+  labels:
+    app: immich
+    component: microservices
+spec:
+  selector:
+    app: immich
+    component: microservices
+  ports:
+    - port: 3002
+      targetPort: 3002
+      protocol: TCP
+      name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: immich-machine-learning
+  namespace: media
+  labels:
+    app: immich
+    component: machine-learning
+spec:
+  selector:
+    app: immich
+    component: machine-learning
+  ports:
+    - port: 3003
+      targetPort: 3003
+      protocol: TCP
+      name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: immich-web
+  namespace: media
+  labels:
+    app: immich
+    component: web
+spec:
+  selector:
+    app: immich
+    component: web
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: immich-lb
+  namespace: media
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: "192.168.71.14"    
+    external-dns.alpha.kubernetes.io/hostname: "immich.home"
+    external-dns.alpha.kubernetes.io/ingress-hostname-source: "service-annotation-only"
+  labels:
+    app: immich
+spec:
+  selector:
+    app: immich
+    component: server
+  ports:
+    - port: 80
+      targetPort: 3001
+      protocol: TCP
+      name: http
+    - port: 443
+      targetPort: 3001
+      protocol: TCP
+      name: https
+  type: LoadBalancer

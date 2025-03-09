@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: immich
+  namespace: ${argo_cd_namespace}
+spec:
+  project: apps
+  source:
+    repoURL: https://github.com/amunt0/argocd-apps
+    targetRevision: HEAD
+    path: configs/immich
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: media
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
