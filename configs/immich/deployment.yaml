@@ -47,7 +47,7 @@ spec:
               readOnly: true
       containers:
         - name: immich-server
-          image: ghcr.io/immich-app/immich-server:v1.98.0
+          image: ghcr.io/immich-app/immich-server:main
           ports:
             - containerPort: 3001
               name: http
@@ -135,7 +135,7 @@ spec:
     spec:
       containers:
         - name: immich-microservices
-          image: ghcr.io/immich-app/immich-server:v1.98.0
+          image: ghcr.io/immich-app/immich-server:main
           command: ["node", "microservices.js"]
           env:
             - name: IMMICH_CONFIG_PATH
@@ -214,7 +214,7 @@ spec:
     spec:
       containers:
         - name: immich-machine-learning
-          image: ghcr.io/immich-app/immich-machine-learning:v1.98.0
+          image: ghcr.io/immich-app/immich-machine-learning:main
           env:
             - name: IMMICH_CONFIG_PATH
               value: /etc/immich/.env
@@ -268,7 +268,7 @@ spec:
     spec:
       containers:
         - name: immich-web
-          image: ghcr.io/immich-app/immich-web:v1.98.0
+          image: ghcr.io/immich-app/immich-web:main
           env:
             - name: IMMICH_CONFIG_PATH
               value: /etc/immich/.env
