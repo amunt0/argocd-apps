@@ -53,15 +53,12 @@ spec:
         - name: downloads
           hostPath:
             path: /mnt/ssd/downloads
-            type: Directory
         - name: series
           hostPath:
             path: /mnt/minio/series
-            type: Directory
         - name: movies
           hostPath:
             path: /mnt/minio/movies
-            type: Directory
 ---
 apiVersion: v1
 kind: Service
